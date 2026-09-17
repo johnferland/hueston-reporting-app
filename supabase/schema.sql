@@ -69,6 +69,14 @@ create table gsc_metrics (
   unique (brand_id, date)
 );
 
+create table gsc_query_days (
+  brand_id uuid not null references brands(id) on delete cascade,
+  date date not null,
+  query text not null,
+  position numeric,
+  primary key (brand_id, date, query)
+);
+
 create table ads_metrics (
   id uuid primary key default gen_random_uuid(),
   brand_id uuid not null references brands(id),

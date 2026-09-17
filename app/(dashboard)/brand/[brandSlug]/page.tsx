@@ -10,8 +10,8 @@ import {
 import {
   clampToToday,
   currentWeekStart,
+  getCumulativeAsOf,
   getPeriodRange,
-  getPreviousPeriodRange,
   isIsoDate,
   isPeriodKey,
   orderedDateRange,
@@ -66,7 +66,7 @@ export default async function BrandDashboard({
   } = await searchParams;
   const period: PeriodKey = isPeriodKey(periodParam) ? periodParam : "week";
   const range = getPeriodRange(period);
-  const previous = getPreviousPeriodRange(period);
+  const asOf = getCumulativeAsOf(period);
   const leadsPer = parseWebLeadPageSize(leadsPerParam);
   const defaultLeadsRange = orderedDateRange(range.start, clampToToday(range.end));
   const leadsRange = orderedDateRange(
@@ -116,7 +116,7 @@ export default async function BrandDashboard({
     <Page brand={brandSlug}>
       <PageHeader
         title={brand.name as string}
-        description={`${brand.domain as string} · ${range.start} to ${range.end} totals vs ${previous.start} to ${previous.end}`}
+        description={`${brand.domain as string} · account totals through ${asOf.current} vs ${asOf.previous}`}
         actions={
           <PeriodToggle
             current={period}

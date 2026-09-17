@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { getPreviousPeriodRange, utcTodayIso, type PeriodKey } from "@/lib/period";
+import { getCumulativeAsOf, utcTodayIso, type PeriodKey } from "@/lib/period";
 import { percentChange, sum, weightedAverage, type DateRange } from "@/lib/aggregation";
 import { AI_REFERRAL_PATTERNS, type AiReferralKey } from "@/lib/integrations/ga4";
 import { sumWebLeads } from "@/lib/web-leads";
@@ -61,13 +61,63 @@ function isoDateOnly(value: string): string {
   return String(value).slice(0, 10);
 }
 
-function inRange<T extends { date: string }>(rows: T[], range: DateRange): T[] {
-  const start = isoDateOnly(range.start);
-  const end = isoDateOnly(range.end);
-  return rows.filter((row) => {
-    const date = isoDateOnly(row.date);
-    return date >= start && date <= end;
-  });
+function through<T extends { date: string }>(rows: T[], asOf: string): T[] {
+  const end = isoDateOnly(asOf);
+  return rows.filter((row) => isoDateOnly(row.date) <= end);
+}
+
+function latestThrough<T extends { date: string }>(rows: T[], asOf: string): T | undefined {
+  const eligible = through(rows, asOf).sort((a, b) => isoDateOnly(a.date).localeCompare(isoDateOnly(b.date)));
+  return eligible[eligible.length - 1];
+}
+
+async function loadQueryDays(
+  brandId: string,
+  asOf: string,
+): Promise<Array<{ query: string; date: string; position: number }> | null> {
+  const supabase = getSupabaseAdmin();
+  const pageSize = 1000;
+  let from = 0;
+  const rows: Array<{ query: string; date: string; position: number }> = [];
+  while (true) {
+    const { data, error } = await supabase
+      .from("gsc_query_days")
+      .select("query, date, position")
+      .eq("brand_id", brandId)
+      .lte("date", asOf)
+      .range(from, from + pageSize - 1);
+    if (error) {
+      if (/does not exist|schema cache/i.test(error.message)) return null;
+      throw new Error(error.message);
+    }
+    if (!data?.length) break;
+    for (const row of data) {
+      rows.push({
+        query: String(row.query ?? ""),
+        date: isoDateOnly(String(row.date ?? "")),
+        position: Number(row.position ?? 100),
+      });
+    }
+    if (data.length < pageSize) break;
+    from += pageSize;
+    if (from > 200000) break;
+  }
+  return rows;
+}
+
+function uniqueQueries(
+  rows: Array<{ query: string; date: string; position: number }>,
+  asOf: string,
+  top3Only: boolean,
+): number {
+  const end = isoDateOnly(asOf);
+  const queries = new Set<string>();
+  for (const row of rows) {
+    if (!row.query || row.date > end) continue;
+    if (top3Only && row.position > 3) continue;
+    queries.add(row.query);
+  }
+  return queries.size;
 }
 
 function adsSlice(
@@ -146,13 +196,13 @@ function aiBreakdown(
 
 export async function getBrandPeriodMetrics(
   brandId: string,
-  range: DateRange,
+  _range: DateRange,
   period: PeriodKey = "week",
 ): Promise<BrandPeriodMetrics> {
-  const previous = getPreviousPeriodRange(period);
+  const asOf = getCumulativeAsOf(period);
   const supabase = getSupabaseAdmin();
-  const from = previous.start;
-  const to = range.end;
+  const to = asOf.current;
+  const rowLimit = 5000;
 
   const [
     { data: ga4, error: ga4Error },
@@ -161,33 +211,35 @@ export async function getBrandPeriodMetrics(
     { data: leads, error: leadsError },
     webCurrent,
     webPrevious,
+    queryDays,
   ] = await Promise.all([
     supabase
       .from("ga4_metrics")
       .select("date, sessions, conversions, organic_sessions, new_users, ai_referral_breakdown")
       .eq("brand_id", brandId)
-      .gte("date", from)
-      .lte("date", to),
+      .lte("date", to)
+      .limit(rowLimit),
     supabase
       .from("gsc_metrics")
       .select("date, clicks, impressions, ctr, avg_position, keywords_top3, total_keywords")
       .eq("brand_id", brandId)
-      .gte("date", from)
-      .lte("date", to),
+      .lte("date", to)
+      .limit(rowLimit),
     supabase
       .from("ads_metrics")
       .select("date, source, spend, leads, clicks, impressions")
       .eq("brand_id", brandId)
-      .gte("date", from)
-      .lte("date", to),
+      .lte("date", to)
+      .limit(rowLimit),
     supabase
       .from("manual_leads")
       .select("week_start_date, lead_count, phone_leads, email_leads, referral_leads, trade_show_leads, social_media_leads")
       .eq("brand_id", brandId)
-      .gte("week_start_date", from)
-      .lte("week_start_date", to),
-    sumWebLeads(brandId, range.start, webLeadsEnd(range.end)),
-    sumWebLeads(brandId, previous.start, previous.end),
+      .lte("week_start_date", to)
+      .limit(rowLimit),
+    sumWebLeads(brandId, "2015-01-01", webLeadsEnd(asOf.current)),
+    sumWebLeads(brandId, "2015-01-01", webLeadsEnd(asOf.previous)),
+    loadQueryDays(brandId, asOf.current),
   ]);
 
   const missingColumn = (message: string | undefined) =>
@@ -200,8 +252,8 @@ export async function getBrandPeriodMetrics(
             .from("ga4_metrics")
             .select("date, sessions, conversions, ai_referral_breakdown")
             .eq("brand_id", brandId)
-            .gte("date", from)
             .lte("date", to)
+            .limit(rowLimit)
         ).data
       : ga4Error
         ? (() => {
@@ -215,8 +267,8 @@ export async function getBrandPeriodMetrics(
             .from("gsc_metrics")
             .select("date, clicks, impressions, ctr, avg_position")
             .eq("brand_id", brandId)
-            .gte("date", from)
             .lte("date", to)
+            .limit(rowLimit)
         ).data
       : gscError
         ? (() => {
@@ -230,8 +282,8 @@ export async function getBrandPeriodMetrics(
             .from("ads_metrics")
             .select("date, source, spend, leads, clicks")
             .eq("brand_id", brandId)
-            .gte("date", from)
             .lte("date", to)
+            .limit(rowLimit)
         ).data
       : adsError
         ? (() => {
@@ -246,16 +298,16 @@ export async function getBrandPeriodMetrics(
             .from("manual_leads")
             .select("week_start_date, lead_count, phone_leads, email_leads, referral_leads, trade_show_leads")
             .eq("brand_id", brandId)
-            .gte("week_start_date", from)
             .lte("week_start_date", to)
+            .limit(rowLimit)
         ).data ??
         (
           await supabase
             .from("manual_leads")
             .select("week_start_date, lead_count")
             .eq("brand_id", brandId)
-            .gte("week_start_date", from)
             .lte("week_start_date", to)
+            .limit(rowLimit)
         ).data
       : leadsError
         ? (() => {
@@ -300,34 +352,45 @@ export async function getBrandPeriodMetrics(
     }),
   }));
 
-  const currentGa4 = inRange(ga4Rows, range);
-  const previousGa4 = inRange(ga4Rows, previous);
-  const currentGsc = inRange(gscRows, range);
-  const previousGsc = inRange(gscRows, previous);
-  const currentAds = inRange(adsRows, range);
-  const previousAds = inRange(adsRows, previous);
-  const currentLeads = inRange(leadRows, range);
-  const previousLeads = inRange(leadRows, previous);
+  const currentGa4 = through(ga4Rows, asOf.current);
+  const previousGa4 = through(ga4Rows, asOf.previous);
+  const currentGsc = through(gscRows, asOf.current);
+  const previousGsc = through(gscRows, asOf.previous);
+  const currentAds = through(adsRows, asOf.current);
+  const previousAds = through(adsRows, asOf.previous);
+  const currentLeads = through(leadRows, asOf.current);
+  const previousLeads = through(leadRows, asOf.previous);
 
-  const gscRollup = (rows: typeof gscRows) => {
+  const gscRollup = (rows: typeof gscRows, asOfDate: string) => {
     const clicks = sum(rows.map((row) => Number(row.clicks ?? 0)));
     const impressions = sum(rows.map((row) => Number(row.impressions ?? 0)));
     const positions = rows
       .filter((row) => row.avg_position != null)
       .map((row) => Number(row.avg_position));
     const weights = rows.filter((row) => row.avg_position != null).map((row) => Number(row.impressions ?? 0));
+    const latest = latestThrough(rows, asOfDate);
     return {
       clicks,
       impressions,
       ctr: impressions === 0 ? 0 : clicks / impressions,
       avgPosition: positions.length ? weightedAverage(positions, weights) : 0,
-      keywordsTop3: sum(rows.map((row) => Number(row.keywords_top3 ?? 0))),
-      totalKeywords: sum(rows.map((row) => Number(row.total_keywords ?? 0))),
+      keywordsTop3: Number(latest?.keywords_top3 ?? 0),
+      totalKeywords: Number(latest?.total_keywords ?? 0),
     };
   };
 
-  const currentSeo = gscRollup(currentGsc);
-  const previousSeo = gscRollup(previousGsc);
+  const currentSeo = gscRollup(currentGsc, asOf.current);
+  const previousSeo = gscRollup(previousGsc, asOf.previous);
+  if (queryDays?.length) {
+    const currentTop3 = uniqueQueries(queryDays, asOf.current, true);
+    const previousTop3 = uniqueQueries(queryDays, asOf.previous, true);
+    const currentTotal = uniqueQueries(queryDays, asOf.current, false);
+    const previousTotal = uniqueQueries(queryDays, asOf.previous, false);
+    if (currentTop3) currentSeo.keywordsTop3 = currentTop3;
+    if (previousTop3) previousSeo.keywordsTop3 = previousTop3;
+    if (currentTotal) currentSeo.totalKeywords = currentTotal;
+    if (previousTotal) previousSeo.totalKeywords = previousTotal;
+  }
 
   const currentGoogle = adsSlice(currentAds, "google");
   const previousGoogle = adsSlice(previousAds, "google");

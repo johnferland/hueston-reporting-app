@@ -125,28 +125,75 @@ async function mapPool<T, R>(items: T[], concurrency: number, fn: (item: T) => P
   return results;
 }
 
-async function fetchKeywordCountsByDate(
+async function fetchKeywordData(
+  brandId: string,
   siteUrl: string,
   accessToken: string,
   startDate: string,
   endDate: string,
-): Promise<Map<string, { keywordsTop3: number; totalKeywords: number }>> {
+): Promise<{
+  byDate: Map<string, { keywordsTop3: number; totalKeywords: number }>;
+  queryDays: Array<{ brand_id: string; date: string; query: string; position: number }>;
+}> {
   const chunks = dateChunks(startDate, endDate, 14);
-  const maps = await mapPool(chunks, 4, async (chunk) => {
+  const parts = await mapPool(chunks, 4, async (chunk) => {
     try {
       const report = await queryGscAllRows(siteUrl, accessToken, chunk.start, chunk.end, ["date", "query"]);
-      return keywordCountsByDate(report);
+      return {
+        counts: keywordCountsByDate(report),
+        queries: queryDayRows(brandId, report),
+      };
     } catch {
-      return new Map<string, { keywordsTop3: number; totalKeywords: number }>();
+      return {
+        counts: new Map<string, { keywordsTop3: number; totalKeywords: number }>(),
+        queries: [] as Array<{ brand_id: string; date: string; query: string; position: number }>,
+      };
     }
   });
   const byDate = new Map<string, { keywordsTop3: number; totalKeywords: number }>();
-  for (const part of maps) {
-    for (const [date, counts] of part) {
+  const queryDays: Array<{ brand_id: string; date: string; query: string; position: number }> = [];
+  for (const part of parts) {
+    for (const [date, counts] of part.counts) {
       byDate.set(date, counts);
     }
+    queryDays.push(...part.queries);
   }
-  return byDate;
+  return { byDate, queryDays };
+}
+
+function queryDayRows(
+  brandId: string,
+  report: GscQueryResponse,
+): Array<{ brand_id: string; date: string; query: string; position: number }> {
+  const rows: Array<{ brand_id: string; date: string; query: string; position: number }> = [];
+  for (const row of report.rows ?? []) {
+    const date = row.keys?.[0] ?? "";
+    const query = (row.keys?.[1] ?? "").trim().slice(0, 450);
+    if (!date || !query) continue;
+    rows.push({
+      brand_id: brandId,
+      date,
+      query,
+      position: Number(row.position ?? 100),
+    });
+  }
+  return rows;
+}
+
+async function upsertQueryDays(
+  rows: Array<{ brand_id: string; date: string; query: string; position: number }>,
+) {
+  if (!rows.length) return;
+  const supabase = getSupabaseAdmin();
+  const chunkSize = 500;
+  for (let index = 0; index < rows.length; index += chunkSize) {
+    const chunk = rows.slice(index, index + chunkSize);
+    const { error } = await supabase.from("gsc_query_days").upsert(chunk, { onConflict: "brand_id,date,query" });
+    if (error) {
+      if (/does not exist|schema cache/i.test(error.message)) return;
+      throw new Error(error.message);
+    }
+  }
 }
 
 function keywordCountsByDate(report: GscQueryResponse): Map<string, { keywordsTop3: number; totalKeywords: number }> {
@@ -213,7 +260,14 @@ export async function syncGscForBrand(
       .eq("brand_id", brandId);
   }
 
-  const keywordByDate = await fetchKeywordCountsByDate(siteUrl, accessToken, startDate, endDate);
+  const { byDate: keywordByDate, queryDays } = await fetchKeywordData(
+    brandId,
+    siteUrl,
+    accessToken,
+    startDate,
+    endDate,
+  );
+  await upsertQueryDays(queryDays);
 
   const rows = (report.rows ?? [])
     .map((row) => {
