@@ -3,6 +3,8 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import { syncGscForBrand } from "@/lib/integrations/gsc";
 import { CRON_SYNC_DAYS, syncDateRange } from "@/lib/integrations/sync-window";
 
+export const maxDuration = 300;
+
 export async function GET() {
   const supabase = getSupabaseAdmin();
   const { data: brands } = await supabase.from("brands").select("id");

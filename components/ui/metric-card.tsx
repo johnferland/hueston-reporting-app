@@ -35,7 +35,9 @@ export function MetricCard({
         {formatNumber(metric.current, digits)}
         {suffix}
       </p>
-      <p className={deltaClass}>{formatDelta(metric.delta)} vs prior period</p>
+      <p className={deltaClass}>
+        {formatDelta(metric.delta)} vs {prefix}{formatNumber(metric.previous, digits)}{suffix} prior
+      </p>
     </Card>
   );
 }

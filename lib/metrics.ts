@@ -57,8 +57,17 @@ function webLeadsEnd(end: string): string {
   return end > today ? today : end;
 }
 
+function isoDateOnly(value: string): string {
+  return String(value).slice(0, 10);
+}
+
 function inRange<T extends { date: string }>(rows: T[], range: DateRange): T[] {
-  return rows.filter((row) => row.date >= range.start && row.date <= range.end);
+  const start = isoDateOnly(range.start);
+  const end = isoDateOnly(range.end);
+  return rows.filter((row) => {
+    const date = isoDateOnly(row.date);
+    return date >= start && date <= end;
+  });
 }
 
 function adsSlice(

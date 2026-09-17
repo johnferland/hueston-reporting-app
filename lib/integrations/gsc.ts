@@ -35,6 +35,27 @@ function gscSiteCandidates(siteUrl: string): string[] {
   return [...new Set(candidates.filter(Boolean))];
 }
 
+function addCalendarDays(iso: string, amount: number): string {
+  const [year, month, day] = iso.split("-").map(Number);
+  const next = new Date(year, month - 1, day + amount);
+  const y = next.getFullYear();
+  const m = String(next.getMonth() + 1).padStart(2, "0");
+  const d = String(next.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function dateChunks(startDate: string, endDate: string, chunkDays = 7): Array<{ start: string; end: string }> {
+  const chunks: Array<{ start: string; end: string }> = [];
+  let start = startDate;
+  while (start <= endDate) {
+    let end = addCalendarDays(start, chunkDays - 1);
+    if (end > endDate) end = endDate;
+    chunks.push({ start, end });
+    start = addCalendarDays(end, 1);
+  }
+  return chunks;
+}
+
 async function queryGsc(
   siteUrl: string,
   accessToken: string,
@@ -42,6 +63,7 @@ async function queryGsc(
   endDate: string,
   dimensions: string[],
   rowLimit = 1000,
+  startRow = 0,
 ): Promise<GscQueryResponse> {
   const encodedSite = encodeURIComponent(siteUrl);
   const response = await fetch(
@@ -57,6 +79,7 @@ async function queryGsc(
         endDate,
         dimensions,
         rowLimit,
+        startRow,
       }),
     },
   );
@@ -65,6 +88,65 @@ async function queryGsc(
     throw new Error(data.error?.message ?? `GSC API error ${response.status}`);
   }
   return data;
+}
+
+async function queryGscAllRows(
+  siteUrl: string,
+  accessToken: string,
+  startDate: string,
+  endDate: string,
+  dimensions: string[],
+  rowLimit = 25000,
+): Promise<GscQueryResponse> {
+  const rows: NonNullable<GscQueryResponse["rows"]> = [];
+  let startRow = 0;
+  while (true) {
+    const page = await queryGsc(siteUrl, accessToken, startDate, endDate, dimensions, rowLimit, startRow);
+    const batch = page.rows ?? [];
+    rows.push(...batch);
+    if (batch.length < rowLimit) break;
+    startRow += rowLimit;
+    if (startRow >= 100000) break;
+  }
+  return { rows };
+}
+
+async function mapPool<T, R>(items: T[], concurrency: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results: R[] = [];
+  let next = 0;
+  async function worker() {
+    while (next < items.length) {
+      const index = next;
+      next += 1;
+      results[index] = await fn(items[index]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => worker()));
+  return results;
+}
+
+async function fetchKeywordCountsByDate(
+  siteUrl: string,
+  accessToken: string,
+  startDate: string,
+  endDate: string,
+): Promise<Map<string, { keywordsTop3: number; totalKeywords: number }>> {
+  const chunks = dateChunks(startDate, endDate, 14);
+  const maps = await mapPool(chunks, 4, async (chunk) => {
+    try {
+      const report = await queryGscAllRows(siteUrl, accessToken, chunk.start, chunk.end, ["date", "query"]);
+      return keywordCountsByDate(report);
+    } catch {
+      return new Map<string, { keywordsTop3: number; totalKeywords: number }>();
+    }
+  });
+  const byDate = new Map<string, { keywordsTop3: number; totalKeywords: number }>();
+  for (const part of maps) {
+    for (const [date, counts] of part) {
+      byDate.set(date, counts);
+    }
+  }
+  return byDate;
 }
 
 function keywordCountsByDate(report: GscQueryResponse): Map<string, { keywordsTop3: number; totalKeywords: number }> {
@@ -131,13 +213,7 @@ export async function syncGscForBrand(
       .eq("brand_id", brandId);
   }
 
-  let keywordByDate = new Map<string, { keywordsTop3: number; totalKeywords: number }>();
-  try {
-    const queryReport = await queryGsc(siteUrl, accessToken, startDate, endDate, ["date", "query"], 25000);
-    keywordByDate = keywordCountsByDate(queryReport);
-  } catch {
-    keywordByDate = new Map();
-  }
+  const keywordByDate = await fetchKeywordCountsByDate(siteUrl, accessToken, startDate, endDate);
 
   const rows = (report.rows ?? [])
     .map((row) => {
