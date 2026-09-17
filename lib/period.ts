@@ -83,6 +83,51 @@ export function utcTodayIso(): string {
   return format(calendarToday(), "yyyy-MM-dd");
 }
 
+export function easternDateFromTimestamp(value: string): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(value));
+}
+
+/** Monday snapshots (or today if a sync already ran). Week compares this snapshot to last Monday. */
+export function getSnapshotAsOf(period: PeriodKey = "week", syncedToday = false): { current: string; previous: string } {
+  const today = calendarToday();
+  const thisMonday = startOfWeek(today, { weekStartsOn: 1 });
+  const thisMondayIso = format(thisMonday, "yyyy-MM-dd");
+  const todayIso = format(today, "yyyy-MM-dd");
+  const current = syncedToday ? todayIso : thisMondayIso;
+
+  if (period === "week") {
+    const previous =
+      syncedToday && todayIso > thisMondayIso
+        ? thisMondayIso
+        : format(subWeeks(thisMonday, 1), "yyyy-MM-dd");
+    return { current, previous };
+  }
+  if (period === "month") {
+    let previous = format(startOfWeek(endOfMonth(subMonths(today, 1)), { weekStartsOn: 1 }), "yyyy-MM-dd");
+    if (previous >= current) {
+      previous = format(startOfWeek(endOfMonth(subMonths(today, 2)), { weekStartsOn: 1 }), "yyyy-MM-dd");
+    }
+    return { current, previous };
+  }
+  if (period === "quarter") {
+    let previous = format(startOfWeek(endOfMonth(subMonths(today, 4)), { weekStartsOn: 1 }), "yyyy-MM-dd");
+    if (previous >= current) {
+      previous = format(startOfWeek(endOfMonth(subMonths(today, 7)), { weekStartsOn: 1 }), "yyyy-MM-dd");
+    }
+    return { current, previous };
+  }
+  let previous = format(startOfWeek(endOfYear(subYears(today, 1)), { weekStartsOn: 1 }), "yyyy-MM-dd");
+  if (previous >= current) {
+    previous = format(startOfWeek(endOfYear(subYears(today, 2)), { weekStartsOn: 1 }), "yyyy-MM-dd");
+  }
+  return { current, previous };
+}
+
 export function clampToToday(date: string): string {
   const today = utcTodayIso();
   return date > today ? today : date;

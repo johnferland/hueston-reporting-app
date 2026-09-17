@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { getPreviousPeriodRange, utcTodayIso, type PeriodKey } from "@/lib/period";
+import { easternDateFromTimestamp, getSnapshotAsOf, utcTodayIso, type PeriodKey } from "@/lib/period";
 import { percentChange, sum, weightedAverage, type DateRange } from "@/lib/aggregation";
 import { AI_REFERRAL_PATTERNS, type AiReferralKey } from "@/lib/integrations/ga4";
 import { sumWebLeads } from "@/lib/web-leads";
@@ -11,6 +11,8 @@ export type MetricValue = {
 };
 
 export type BrandPeriodMetrics = {
+  snapshotCurrent: string;
+  snapshotPrevious: string;
   sessions: MetricValue;
   conversions: MetricValue;
   organicTraffic: MetricValue;
@@ -61,18 +63,14 @@ function isoDateOnly(value: string): string {
   return String(value).slice(0, 10);
 }
 
-function inRange<T extends { date: string }>(rows: T[], range: DateRange): T[] {
-  const start = isoDateOnly(range.start);
-  const end = isoDateOnly(range.end);
-  return rows.filter((row) => {
-    const date = isoDateOnly(row.date);
-    return date >= start && date <= end;
-  });
+function through<T extends { date: string }>(rows: T[], asOf: string): T[] {
+  const end = isoDateOnly(asOf);
+  return rows.filter((row) => isoDateOnly(row.date) <= end);
 }
 
-function lastInRange<T extends { date: string }>(rows: T[]): T | undefined {
-  const sorted = [...rows].sort((a, b) => isoDateOnly(a.date).localeCompare(isoDateOnly(b.date)));
-  return sorted[sorted.length - 1];
+function lastThrough<T extends { date: string }>(rows: T[], asOf: string): T | undefined {
+  const eligible = through(rows, asOf).sort((a, b) => isoDateOnly(a.date).localeCompare(isoDateOnly(b.date)));
+  return eligible[eligible.length - 1];
 }
 
 function adsSlice(
@@ -151,13 +149,25 @@ function aiBreakdown(
 
 export async function getBrandPeriodMetrics(
   brandId: string,
-  range: DateRange,
+  _range: DateRange,
   period: PeriodKey = "week",
 ): Promise<BrandPeriodMetrics> {
-  const previous = getPreviousPeriodRange(period);
   const supabase = getSupabaseAdmin();
-  const from = previous.start;
-  const to = range.end;
+  const today = utcTodayIso();
+  const { data: latestSync } = await supabase
+    .from("sync_logs")
+    .select("created_at")
+    .eq("brand_id", brandId)
+    .eq("status", "success")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const syncedToday = Boolean(
+    latestSync?.created_at && easternDateFromTimestamp(String(latestSync.created_at)) === today,
+  );
+  const asOf = getSnapshotAsOf(period, syncedToday);
+  const to = asOf.current;
+  const rowLimit = 5000;
 
   const [
     { data: ga4, error: ga4Error },
@@ -171,28 +181,28 @@ export async function getBrandPeriodMetrics(
       .from("ga4_metrics")
       .select("date, sessions, conversions, organic_sessions, new_users, ai_referral_breakdown")
       .eq("brand_id", brandId)
-      .gte("date", from)
-      .lte("date", to),
+      .lte("date", to)
+      .limit(rowLimit),
     supabase
       .from("gsc_metrics")
       .select("date, clicks, impressions, ctr, avg_position, keywords_top3, total_keywords")
       .eq("brand_id", brandId)
-      .gte("date", from)
-      .lte("date", to),
+      .lte("date", to)
+      .limit(rowLimit),
     supabase
       .from("ads_metrics")
       .select("date, source, spend, leads, clicks, impressions")
       .eq("brand_id", brandId)
-      .gte("date", from)
-      .lte("date", to),
+      .lte("date", to)
+      .limit(rowLimit),
     supabase
       .from("manual_leads")
       .select("week_start_date, lead_count, phone_leads, email_leads, referral_leads, trade_show_leads, social_media_leads")
       .eq("brand_id", brandId)
-      .gte("week_start_date", from)
-      .lte("week_start_date", to),
-    sumWebLeads(brandId, range.start, webLeadsEnd(range.end)),
-    sumWebLeads(brandId, previous.start, previous.end),
+      .lte("week_start_date", to)
+      .limit(rowLimit),
+    sumWebLeads(brandId, "2015-01-01", webLeadsEnd(asOf.current)),
+    sumWebLeads(brandId, "2015-01-01", webLeadsEnd(asOf.previous)),
   ]);
 
   const missingColumn = (message: string | undefined) =>
@@ -205,8 +215,8 @@ export async function getBrandPeriodMetrics(
             .from("ga4_metrics")
             .select("date, sessions, conversions, ai_referral_breakdown")
             .eq("brand_id", brandId)
-            .gte("date", from)
             .lte("date", to)
+            .limit(rowLimit)
         ).data
       : ga4Error
         ? (() => {
@@ -220,8 +230,8 @@ export async function getBrandPeriodMetrics(
             .from("gsc_metrics")
             .select("date, clicks, impressions, ctr, avg_position")
             .eq("brand_id", brandId)
-            .gte("date", from)
             .lte("date", to)
+            .limit(rowLimit)
         ).data
       : gscError
         ? (() => {
@@ -235,8 +245,8 @@ export async function getBrandPeriodMetrics(
             .from("ads_metrics")
             .select("date, source, spend, leads, clicks")
             .eq("brand_id", brandId)
-            .gte("date", from)
             .lte("date", to)
+            .limit(rowLimit)
         ).data
       : adsError
         ? (() => {
@@ -251,16 +261,16 @@ export async function getBrandPeriodMetrics(
             .from("manual_leads")
             .select("week_start_date, lead_count, phone_leads, email_leads, referral_leads, trade_show_leads")
             .eq("brand_id", brandId)
-            .gte("week_start_date", from)
             .lte("week_start_date", to)
+            .limit(rowLimit)
         ).data ??
         (
           await supabase
             .from("manual_leads")
             .select("week_start_date, lead_count")
             .eq("brand_id", brandId)
-            .gte("week_start_date", from)
             .lte("week_start_date", to)
+            .limit(rowLimit)
         ).data
       : leadsError
         ? (() => {
@@ -305,23 +315,23 @@ export async function getBrandPeriodMetrics(
     }),
   }));
 
-  const currentGa4 = inRange(ga4Rows, range);
-  const previousGa4 = inRange(ga4Rows, previous);
-  const currentGsc = inRange(gscRows, range);
-  const previousGsc = inRange(gscRows, previous);
-  const currentAds = inRange(adsRows, range);
-  const previousAds = inRange(adsRows, previous);
-  const currentLeads = inRange(leadRows, range);
-  const previousLeads = inRange(leadRows, previous);
+  const currentGa4 = through(ga4Rows, asOf.current);
+  const previousGa4 = through(ga4Rows, asOf.previous);
+  const currentGsc = through(gscRows, asOf.current);
+  const previousGsc = through(gscRows, asOf.previous);
+  const currentAds = through(adsRows, asOf.current);
+  const previousAds = through(adsRows, asOf.previous);
+  const currentLeads = through(leadRows, asOf.current);
+  const previousLeads = through(leadRows, asOf.previous);
 
-  const gscRollup = (rows: typeof gscRows) => {
+  const gscRollup = (rows: typeof gscRows, asOfDate: string) => {
     const clicks = sum(rows.map((row) => Number(row.clicks ?? 0)));
     const impressions = sum(rows.map((row) => Number(row.impressions ?? 0)));
     const positions = rows
       .filter((row) => row.avg_position != null)
       .map((row) => Number(row.avg_position));
     const weights = rows.filter((row) => row.avg_position != null).map((row) => Number(row.impressions ?? 0));
-    const latest = lastInRange(rows);
+    const latest = lastThrough(rows, asOfDate);
     return {
       clicks,
       impressions,
@@ -332,8 +342,8 @@ export async function getBrandPeriodMetrics(
     };
   };
 
-  const currentSeo = gscRollup(currentGsc);
-  const previousSeo = gscRollup(previousGsc);
+  const currentSeo = gscRollup(currentGsc, asOf.current);
+  const previousSeo = gscRollup(previousGsc, asOf.previous);
 
   const currentGoogle = adsSlice(currentAds, "google");
   const previousGoogle = adsSlice(previousAds, "google");
@@ -352,6 +362,8 @@ export async function getBrandPeriodMetrics(
   ) as Record<AiReferralKey, MetricValue>;
 
   return {
+    snapshotCurrent: asOf.current,
+    snapshotPrevious: asOf.previous,
     sessions: metric(sum(currentGa4.map((row) => Number(row.sessions ?? 0))), sum(previousGa4.map((row) => Number(row.sessions ?? 0)))),
     conversions: metric(sum(currentGa4.map((row) => Number(row.conversions ?? 0))), sum(previousGa4.map((row) => Number(row.conversions ?? 0)))),
     organicTraffic: metric(
