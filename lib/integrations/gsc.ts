@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getGoogleAccessToken } from "@/lib/integrations/google-auth";
+import { KEYWORD_SYNC_DAYS } from "@/lib/integrations/sync-window";
 
 type GscQueryResponse = {
   rows?: Array<{
@@ -126,74 +127,27 @@ async function mapPool<T, R>(items: T[], concurrency: number, fn: (item: T) => P
 }
 
 async function fetchKeywordData(
-  brandId: string,
   siteUrl: string,
   accessToken: string,
   startDate: string,
   endDate: string,
-): Promise<{
-  byDate: Map<string, { keywordsTop3: number; totalKeywords: number }>;
-  queryDays: Array<{ brand_id: string; date: string; query: string; position: number }>;
-}> {
+): Promise<Map<string, { keywordsTop3: number; totalKeywords: number }>> {
   const chunks = dateChunks(startDate, endDate, 14);
   const parts = await mapPool(chunks, 4, async (chunk) => {
     try {
       const report = await queryGscAllRows(siteUrl, accessToken, chunk.start, chunk.end, ["date", "query"]);
-      return {
-        counts: keywordCountsByDate(report),
-        queries: queryDayRows(brandId, report),
-      };
+      return keywordCountsByDate(report);
     } catch {
-      return {
-        counts: new Map<string, { keywordsTop3: number; totalKeywords: number }>(),
-        queries: [] as Array<{ brand_id: string; date: string; query: string; position: number }>,
-      };
+      return new Map<string, { keywordsTop3: number; totalKeywords: number }>();
     }
   });
   const byDate = new Map<string, { keywordsTop3: number; totalKeywords: number }>();
-  const queryDays: Array<{ brand_id: string; date: string; query: string; position: number }> = [];
   for (const part of parts) {
-    for (const [date, counts] of part.counts) {
+    for (const [date, counts] of part) {
       byDate.set(date, counts);
     }
-    queryDays.push(...part.queries);
   }
-  return { byDate, queryDays };
-}
-
-function queryDayRows(
-  brandId: string,
-  report: GscQueryResponse,
-): Array<{ brand_id: string; date: string; query: string; position: number }> {
-  const rows: Array<{ brand_id: string; date: string; query: string; position: number }> = [];
-  for (const row of report.rows ?? []) {
-    const date = row.keys?.[0] ?? "";
-    const query = (row.keys?.[1] ?? "").trim().slice(0, 450);
-    if (!date || !query) continue;
-    rows.push({
-      brand_id: brandId,
-      date,
-      query,
-      position: Number(row.position ?? 100),
-    });
-  }
-  return rows;
-}
-
-async function upsertQueryDays(
-  rows: Array<{ brand_id: string; date: string; query: string; position: number }>,
-) {
-  if (!rows.length) return;
-  const supabase = getSupabaseAdmin();
-  const chunkSize = 500;
-  for (let index = 0; index < rows.length; index += chunkSize) {
-    const chunk = rows.slice(index, index + chunkSize);
-    const { error } = await supabase.from("gsc_query_days").upsert(chunk, { onConflict: "brand_id,date,query" });
-    if (error) {
-      if (/does not exist|schema cache/i.test(error.message)) return;
-      throw new Error(error.message);
-    }
-  }
+  return byDate;
 }
 
 function keywordCountsByDate(report: GscQueryResponse): Map<string, { keywordsTop3: number; totalKeywords: number }> {
@@ -260,14 +214,11 @@ export async function syncGscForBrand(
       .eq("brand_id", brandId);
   }
 
-  const { byDate: keywordByDate, queryDays } = await fetchKeywordData(
-    brandId,
-    siteUrl,
-    accessToken,
-    startDate,
-    endDate,
-  );
-  await upsertQueryDays(queryDays);
+  const keywordStart =
+    startDate > addCalendarDays(endDate, 1 - KEYWORD_SYNC_DAYS)
+      ? startDate
+      : addCalendarDays(endDate, 1 - KEYWORD_SYNC_DAYS);
+  const keywordByDate = await fetchKeywordData(siteUrl, accessToken, keywordStart, endDate);
 
   const rows = (report.rows ?? [])
     .map((row) => {
@@ -280,8 +231,9 @@ export async function syncGscForBrand(
         impressions: Math.round(Number(row.impressions ?? 0)),
         ctr: Number(row.ctr ?? 0),
         avg_position: row.position == null ? null : Number(row.position),
-        keywords_top3: keywords?.keywordsTop3 ?? 0,
-        total_keywords: keywords?.totalKeywords ?? 0,
+        ...(keywords
+          ? { keywords_top3: keywords.keywordsTop3, total_keywords: keywords.totalKeywords }
+          : {}),
       };
     })
     .filter((row) => row.date);

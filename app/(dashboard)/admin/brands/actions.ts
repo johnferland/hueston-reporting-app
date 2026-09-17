@@ -3,8 +3,6 @@
 import { redirect } from "next/navigation";
 import { requireSuperAdmin } from "@/lib/auth";
 import { createBrand, updateBrand, type Brand } from "@/lib/brands";
-import { formatBrandSyncSummary, syncGoogleMetricsForBrand } from "@/lib/integrations/sync-google";
-import { DASHBOARD_SYNC_DAYS } from "@/lib/integrations/sync-window";
 import { rotateWebLeadsWebhookSecret } from "@/lib/web-leads";
 
 function formValue(formData: FormData, key: string): string {
@@ -51,31 +49,6 @@ export async function updateBrandAction(formData: FormData) {
     fail(error instanceof Error ? error.message : "Could not save brand.");
   }
     redirect(`/admin?saved=${encodeURIComponent(`Saved ${brand.name}`)}`);
-}
-
-export async function syncBrandNowAction(formData: FormData) {
-  await requireSuperAdmin();
-  const brandId = formValue(formData, "brand_id");
-  if (!brandId) fail("Missing brand id.");
-
-  let message = "";
-  let failed = false;
-  try {
-    const result = await syncGoogleMetricsForBrand(brandId, DASHBOARD_SYNC_DAYS);
-    failed =
-      ("ok" in result.brand.ga4 && result.brand.ga4.ok === false) ||
-      ("ok" in result.brand.gsc && result.brand.gsc.ok === false) ||
-      ("ok" in result.brand.ads && result.brand.ads.ok === false) ||
-      ("ok" in result.brand.meta && result.brand.meta.ok === false);
-    message = formatBrandSyncSummary(result.brand);
-  } catch (error) {
-    fail(error instanceof Error ? error.message : "Sync failed.");
-  }
-
-  if (failed) {
-    redirect(`/admin?error=${encodeURIComponent(message)}`);
-  }
-  redirect(`/admin?saved=${encodeURIComponent(message)}`);
 }
 
 export async function rotateWebLeadsWebhookAction(formData: FormData) {

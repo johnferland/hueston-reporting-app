@@ -6,7 +6,6 @@ import {
   startOfMonth,
   startOfWeek,
   startOfYear,
-  subDays,
   subMonths,
   subWeeks,
   subYears,
@@ -74,38 +73,6 @@ export function getPreviousPeriodRange(period: PeriodKey = "week"): DateRange {
   }
   const year = subYears(today, 2);
   return isoRange(startOfYear(year), endOfYear(year));
-}
-
-/**
- * Account snapshots: the big number is always totals through yesterday.
- * Week/month/quarter/year only pick which earlier snapshot to compare against.
- */
-export function getCumulativeAsOf(period: PeriodKey = "week"): { current: string; previous: string } {
-  const today = calendarToday();
-  const current = format(subDays(today, 1), "yyyy-MM-dd");
-  if (period === "week") {
-    const lastMonday = subWeeks(startOfWeek(today, { weekStartsOn: 1 }), 1);
-    return { current, previous: format(lastMonday, "yyyy-MM-dd") };
-  }
-  if (period === "month") {
-    let previousEnd = endOfMonth(subMonths(today, 1));
-    if (format(previousEnd, "yyyy-MM-dd") >= current) {
-      previousEnd = endOfMonth(subMonths(today, 2));
-    }
-    return { current, previous: format(previousEnd, "yyyy-MM-dd") };
-  }
-  if (period === "quarter") {
-    let previousEnd = endOfMonth(subMonths(today, 4));
-    if (format(previousEnd, "yyyy-MM-dd") >= current) {
-      previousEnd = endOfMonth(subMonths(today, 7));
-    }
-    return { current, previous: format(previousEnd, "yyyy-MM-dd") };
-  }
-  let previousEnd = endOfYear(subYears(today, 1));
-  if (format(previousEnd, "yyyy-MM-dd") >= current) {
-    previousEnd = endOfYear(subYears(today, 2));
-  }
-  return { current, previous: format(previousEnd, "yyyy-MM-dd") };
 }
 
 export function currentWeekStart(): string {

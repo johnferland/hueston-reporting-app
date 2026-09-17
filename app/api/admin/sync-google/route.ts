@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { getCurrentAppUser } from "@/lib/auth";
-import { syncGoogleMetrics } from "@/lib/integrations/sync-google";
+import { syncGoogleMetrics, syncGoogleMetricsForBrand } from "@/lib/integrations/sync-google";
 import { DASHBOARD_SYNC_DAYS } from "@/lib/integrations/sync-window";
 
 export const dynamic = "force-dynamic";
@@ -16,25 +16,26 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
+  const brandId = url.searchParams.get("brandId");
   const days = Math.min(
     DASHBOARD_SYNC_DAYS,
     Math.max(1, Number(url.searchParams.get("days") ?? DASHBOARD_SYNC_DAYS) || DASHBOARD_SYNC_DAYS),
   );
 
-  try {
-    const result = await syncGoogleMetrics(days);
-    const failed = result.brands.some(
-      (brand) =>
-        ("ok" in brand.ga4 && brand.ga4.ok === false) ||
-        ("ok" in brand.gsc && brand.gsc.ok === false) ||
-        ("ok" in brand.ads && brand.ads.ok === false) ||
-        ("ok" in brand.meta && brand.meta.ok === false),
-    );
-    return NextResponse.json({ ok: !failed, ...result });
-  } catch (error) {
-    return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "Sync failed" },
-      { status: 500 },
-    );
-  }
+  after(async () => {
+    try {
+      if (brandId) await syncGoogleMetricsForBrand(brandId, days);
+      else await syncGoogleMetrics(days);
+    } catch (error) {
+      console.error("Background Google sync failed", error);
+    }
+  });
+
+  return NextResponse.json({
+    ok: true,
+    started: true,
+    message: brandId
+      ? "Sync started for this company. Keep using the dashboard; it can take a few minutes."
+      : "Sync started for all companies. Keep using the dashboard; it can take a few minutes.",
+  });
 }

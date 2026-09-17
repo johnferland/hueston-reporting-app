@@ -2,11 +2,10 @@ import { requireSuperAdmin } from "@/lib/auth";
 import { listBrandsWithCredentials } from "@/lib/brands";
 import { listManagedUsers } from "@/lib/users";
 import { BrandFormFields } from "@/components/brand-form-fields";
+import { SyncNowButton } from "@/components/sync-now-button";
 import { Alert, Button, Field, Input, Page, PageHeader, Panel, Section, Select, Table, TextMuted } from "@/components/ui";
-import { createBrandAction, syncBrandNowAction, updateBrandAction, rotateWebLeadsWebhookAction } from "./brands/actions";
+import { createBrandAction, updateBrandAction, rotateWebLeadsWebhookAction } from "./brands/actions";
 import { addPersonAction, assignPersonAction } from "./people-actions";
-
-export const maxDuration = 300;
 
 export default async function AdminPage({
   searchParams,
@@ -25,9 +24,7 @@ export default async function AdminPage({
         actions={
           <div className="ds-row">
             <Button href="/api/admin/google-oauth/start">Connect Google</Button>
-            <Button href="/api/admin/sync-google" variant="secondary">
-              Sync all companies
-            </Button>
+            <SyncNowButton label="Sync all companies" />
           </div>
         }
       />
@@ -102,8 +99,7 @@ export default async function AdminPage({
 
       <Section title="Companies & property IDs">
         <TextMuted>
-          Add a company or paste GA4 / GSC / Ads IDs. Sync now pulls the last 14 days of GA4,
-          Search Console, Google Ads, and Meta Ads for that company.
+          Add a company or paste GA4 / GSC / Ads IDs. Sync now runs in the background so you can keep using the dashboard.
         </TextMuted>
 
         <Panel>
@@ -126,10 +122,7 @@ export default async function AdminPage({
               <Button>Save {brand.name}</Button>
             </div>
             </form>
-            <form action={syncBrandNowAction} className="ds-row">
-              <input type="hidden" name="brand_id" value={brand.id} />
-              <Button variant="secondary">Sync now</Button>
-            </form>
+            <SyncNowButton brandId={brand.id} label="Sync now" />
             <div className="ds-stack" style={{ marginTop: "var(--space-4)" }}>
               <h3 className="ds-heading-sm">Web leads webhook</h3>
               <TextMuted>

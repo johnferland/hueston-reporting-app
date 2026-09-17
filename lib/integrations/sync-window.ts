@@ -4,6 +4,8 @@ import { isoDateDaysAgo } from "@/lib/integrations/google-auth";
 export const DASHBOARD_SYNC_DAYS = 730;
 /** Weekly cron (Monday 11:00 UTC in vercel.json = 7:00 AM Eastern during EDT). Two complete Mon–Sun weeks plus buffer through yesterday so period-over-period totals have data. */
 export const CRON_SYNC_DAYS = 16;
+/** Query-level Search Console pull is expensive; keep it to recent days so Sync now cannot freeze the app. */
+export const KEYWORD_SYNC_DAYS = 32;
 
 export function syncDateRange(days: number): { startDate: string; endDate: string } {
   return {
