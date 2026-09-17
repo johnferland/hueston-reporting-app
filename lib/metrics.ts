@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { easternDateFromTimestamp, getSnapshotAsOf, utcTodayIso, type PeriodKey } from "@/lib/period";
+import { easternDateFromTimestamp, getPreviousPeriodRange, getSnapshotAsOf, utcTodayIso, type PeriodKey } from "@/lib/period";
 import { percentChange, sum, weightedAverage, type DateRange } from "@/lib/aggregation";
 import { AI_REFERRAL_PATTERNS, type AiReferralKey } from "@/lib/integrations/ga4";
 import { sumWebLeads } from "@/lib/web-leads";
@@ -27,12 +27,14 @@ export type BrandPeriodMetrics = {
   googleSpend: MetricValue;
   googleImpressions: MetricValue;
   googleClicks: MetricValue;
+  googleCpc: MetricValue;
   googleConversions: MetricValue;
   googleCostPerConversion: MetricValue;
   adsCostPerConversion: MetricValue;
   metaSpend: MetricValue;
   metaImpressions: MetricValue;
   metaClicks: MetricValue;
+  metaCpc: MetricValue;
   metaLeads: MetricValue;
   metaCtr: MetricValue;
   metaCostPerLead: MetricValue;
@@ -66,6 +68,15 @@ function isoDateOnly(value: string): string {
 function through<T extends { date: string }>(rows: T[], asOf: string): T[] {
   const end = isoDateOnly(asOf);
   return rows.filter((row) => isoDateOnly(row.date) <= end);
+}
+
+function inRange<T extends { date: string }>(rows: T[], range: DateRange): T[] {
+  const start = isoDateOnly(range.start);
+  const end = isoDateOnly(range.end);
+  return rows.filter((row) => {
+    const date = isoDateOnly(row.date);
+    return date >= start && date <= end;
+  });
 }
 
 function lastThrough<T extends { date: string }>(rows: T[], asOf: string): T | undefined {
@@ -166,6 +177,8 @@ export async function getBrandPeriodMetrics(
     latestSync?.created_at && easternDateFromTimestamp(String(latestSync.created_at)) === today,
   );
   const asOf = getSnapshotAsOf(period, syncedToday);
+  const periodRange = _range;
+  const previousRange = getPreviousPeriodRange(period);
   const to = asOf.current;
   const rowLimit = 5000;
 
@@ -193,16 +206,18 @@ export async function getBrandPeriodMetrics(
       .from("ads_metrics")
       .select("date, source, spend, leads, clicks, impressions")
       .eq("brand_id", brandId)
-      .lte("date", to)
+      .gte("date", previousRange.start)
+      .lte("date", periodRange.end)
       .limit(rowLimit),
     supabase
       .from("manual_leads")
       .select("week_start_date, lead_count, phone_leads, email_leads, referral_leads, trade_show_leads, social_media_leads")
       .eq("brand_id", brandId)
-      .lte("week_start_date", to)
+      .gte("week_start_date", previousRange.start)
+      .lte("week_start_date", periodRange.end)
       .limit(rowLimit),
-    sumWebLeads(brandId, "2015-01-01", webLeadsEnd(asOf.current)),
-    sumWebLeads(brandId, "2015-01-01", webLeadsEnd(asOf.previous)),
+    sumWebLeads(brandId, periodRange.start, webLeadsEnd(periodRange.end)),
+    sumWebLeads(brandId, previousRange.start, webLeadsEnd(previousRange.end)),
   ]);
 
   const missingColumn = (message: string | undefined) =>
@@ -245,7 +260,8 @@ export async function getBrandPeriodMetrics(
             .from("ads_metrics")
             .select("date, source, spend, leads, clicks")
             .eq("brand_id", brandId)
-            .lte("date", to)
+            .gte("date", previousRange.start)
+            .lte("date", periodRange.end)
             .limit(rowLimit)
         ).data
       : adsError
@@ -261,7 +277,8 @@ export async function getBrandPeriodMetrics(
             .from("manual_leads")
             .select("week_start_date, lead_count, phone_leads, email_leads, referral_leads, trade_show_leads")
             .eq("brand_id", brandId)
-            .lte("week_start_date", to)
+            .gte("week_start_date", previousRange.start)
+            .lte("week_start_date", periodRange.end)
             .limit(rowLimit)
         ).data ??
         (
@@ -269,7 +286,8 @@ export async function getBrandPeriodMetrics(
             .from("manual_leads")
             .select("week_start_date, lead_count")
             .eq("brand_id", brandId)
-            .lte("week_start_date", to)
+            .gte("week_start_date", previousRange.start)
+            .lte("week_start_date", periodRange.end)
             .limit(rowLimit)
         ).data
       : leadsError
@@ -319,10 +337,10 @@ export async function getBrandPeriodMetrics(
   const previousGa4 = through(ga4Rows, asOf.previous);
   const currentGsc = through(gscRows, asOf.current);
   const previousGsc = through(gscRows, asOf.previous);
-  const currentAds = through(adsRows, asOf.current);
-  const previousAds = through(adsRows, asOf.previous);
-  const currentLeads = through(leadRows, asOf.current);
-  const previousLeads = through(leadRows, asOf.previous);
+  const currentLeads = inRange(leadRows, periodRange);
+  const previousLeads = inRange(leadRows, previousRange);
+  const currentAds = inRange(adsRows, periodRange);
+  const previousAds = inRange(adsRows, previousRange);
 
   const gscRollup = (rows: typeof gscRows, asOfDate: string) => {
     const clicks = sum(rows.map((row) => Number(row.clicks ?? 0)));
@@ -384,6 +402,7 @@ export async function getBrandPeriodMetrics(
     googleSpend: metric(currentGoogle.spend, previousGoogle.spend),
     googleImpressions: metric(currentGoogle.impressions, previousGoogle.impressions),
     googleClicks: metric(currentGoogle.clicks, previousGoogle.clicks),
+    googleCpc: metric(ratio(currentGoogle.spend, currentGoogle.clicks), ratio(previousGoogle.spend, previousGoogle.clicks)),
     googleConversions: metric(currentGoogle.leads, previousGoogle.leads),
     googleCostPerConversion: metric(
       ratio(currentGoogle.spend, currentGoogle.leads),
@@ -396,6 +415,7 @@ export async function getBrandPeriodMetrics(
     metaSpend: metric(currentMeta.spend, previousMeta.spend),
     metaImpressions: metric(currentMeta.impressions, previousMeta.impressions),
     metaClicks: metric(currentMeta.clicks, previousMeta.clicks),
+    metaCpc: metric(ratio(currentMeta.spend, currentMeta.clicks), ratio(previousMeta.spend, previousMeta.clicks)),
     metaLeads: metric(currentMeta.leads, previousMeta.leads),
     metaCtr: metric(ratio(currentMeta.clicks, currentMeta.impressions) * 100, ratio(previousMeta.clicks, previousMeta.impressions) * 100),
     metaCostPerLead: metric(ratio(currentMeta.spend, currentMeta.leads), ratio(previousMeta.spend, previousMeta.leads)),

@@ -11,9 +11,11 @@ import {
   clampToToday,
   currentWeekStart,
   getPeriodRange,
+  getPreviousPeriodRange,
   isIsoDate,
   isPeriodKey,
   orderedDateRange,
+  PERIOD_LABELS,
   type PeriodKey,
 } from "@/lib/period";
 import { PeriodToggle } from "@/components/period-toggle";
@@ -65,6 +67,8 @@ export default async function BrandDashboard({
   } = await searchParams;
   const period: PeriodKey = isPeriodKey(periodParam) ? periodParam : "week";
   const range = getPeriodRange(period);
+  const previousRange = getPreviousPeriodRange(period);
+  const periodLabel = `${PERIOD_LABELS[period]} ${range.start} – ${range.end} vs ${previousRange.start} – ${previousRange.end}`;
   const leadsPer = parseWebLeadPageSize(leadsPerParam);
   const defaultLeadsRange = orderedDateRange(range.start, clampToToday(range.end));
   const leadsRange = orderedDateRange(
@@ -136,6 +140,7 @@ export default async function BrandDashboard({
       {error ? <Alert tone="err">{error}</Alert> : null}
 
       <Section title="Leads">
+        <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
           <MetricCard label="Total leads" metric={metrics.totalLeads} />
           <MetricCard label="Web leads" metric={metrics.webLeads} />
@@ -144,6 +149,9 @@ export default async function BrandDashboard({
       </Section>
 
       <Section title="Search">
+        <TextMuted>
+          Account snapshot {metrics.snapshotCurrent} vs {metrics.snapshotPrevious}
+        </TextMuted>
         <div className="ds-grid">
           <MetricCard label="Keywords top 3" metric={metrics.keywordsTop3} />
           <MetricCard label="Organic reach" metric={metrics.organicReach} />
@@ -158,20 +166,24 @@ export default async function BrandDashboard({
       </Section>
 
       <Section title="Google Ads">
+        <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
           <MetricCard label="Ad spend" metric={metrics.googleSpend} digits={2} prefix="$" lowerIsBetter />
           <MetricCard label="Impressions" metric={metrics.googleImpressions} />
           <MetricCard label="Clicks" metric={metrics.googleClicks} />
+          <MetricCard label="CPC" metric={metrics.googleCpc} digits={2} prefix="$" lowerIsBetter />
           <MetricCard label="Conversions" metric={metrics.googleConversions} />
           <MetricCard label="Cost per conversion" metric={metrics.googleCostPerConversion} digits={2} prefix="$" lowerIsBetter />
         </div>
       </Section>
 
       <Section title="Meta Ads">
+        <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
           <MetricCard label="Ad spend" metric={metrics.metaSpend} digits={2} prefix="$" lowerIsBetter />
           <MetricCard label="Impressions" metric={metrics.metaImpressions} />
           <MetricCard label="Clicks" metric={metrics.metaClicks} />
+          <MetricCard label="CPC" metric={metrics.metaCpc} digits={2} prefix="$" lowerIsBetter />
           <MetricCard label="Leads" metric={metrics.metaLeads} />
           <MetricCard label="CTR" metric={metrics.metaCtr} digits={2} suffix="%" />
           <MetricCard label="Cost per lead" metric={metrics.metaCostPerLead} digits={2} prefix="$" lowerIsBetter />
@@ -179,6 +191,9 @@ export default async function BrandDashboard({
       </Section>
 
       <Section title="AI visibility">
+        <TextMuted>
+          Account snapshot {metrics.snapshotCurrent} vs {metrics.snapshotPrevious}
+        </TextMuted>
         <div className="ds-grid">
           <MetricCard label="Total AI referral traffic" metric={metrics.aiTotal} />
           {AI_REFERRAL_PATTERNS.map((pattern) => (
