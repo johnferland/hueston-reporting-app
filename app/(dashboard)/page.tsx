@@ -32,7 +32,7 @@ export default async function DashboardHome({
   const cards = await Promise.all(
     brands.map(async (brand) => ({
       brand,
-      metrics: await getBrandPeriodMetrics(brand.id, range),
+      metrics: await getBrandPeriodMetrics(brand.id, range, period),
     })),
   );
 

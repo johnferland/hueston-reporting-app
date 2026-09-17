@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { getPreviousPeriod, percentChange, sum, weightedAverage, type DateRange } from "@/lib/aggregation";
+import { getPreviousPeriodRange, utcTodayIso, type PeriodKey } from "@/lib/period";
+import { percentChange, sum, weightedAverage, type DateRange } from "@/lib/aggregation";
 import { AI_REFERRAL_PATTERNS, type AiReferralKey } from "@/lib/integrations/ga4";
 import { sumWebLeads } from "@/lib/web-leads";
 
@@ -50,10 +51,10 @@ function ratio(numerator: number, denominator: number): number {
   return denominator === 0 ? 0 : numerator / denominator;
 }
 
-// Ads/search periods end yesterday (data lags). Web forms arrive today and must still count.
-function includeToday(end: string): string {
-  const today = new Date().toISOString().slice(0, 10);
-  return end < today ? today : end;
+// Completed months/years stay in-range. The current week can still include today's web forms.
+function webLeadsEnd(end: string): string {
+  const today = utcTodayIso();
+  return end > today ? today : end;
 }
 
 function inRange<T extends { date: string }>(rows: T[], range: DateRange): T[] {
@@ -137,8 +138,9 @@ function aiBreakdown(
 export async function getBrandPeriodMetrics(
   brandId: string,
   range: DateRange,
+  period: PeriodKey = "week",
 ): Promise<BrandPeriodMetrics> {
-  const previous = getPreviousPeriod(range);
+  const previous = getPreviousPeriodRange(period);
   const supabase = getSupabaseAdmin();
   const from = previous.start;
   const to = range.end;
@@ -175,7 +177,7 @@ export async function getBrandPeriodMetrics(
       .eq("brand_id", brandId)
       .gte("week_start_date", from)
       .lte("week_start_date", to),
-    sumWebLeads(brandId, range.start, includeToday(range.end)),
+    sumWebLeads(brandId, range.start, webLeadsEnd(range.end)),
     sumWebLeads(brandId, previous.start, previous.end),
   ]);
 

@@ -8,12 +8,12 @@ import {
   parseWebLeadPageSize,
 } from "@/lib/web-leads";
 import {
+  clampToToday,
   currentWeekStart,
   getPeriodRange,
   isIsoDate,
   isPeriodKey,
   orderedDateRange,
-  utcTodayIso,
   type PeriodKey,
 } from "@/lib/period";
 import { PeriodToggle } from "@/components/period-toggle";
@@ -66,7 +66,7 @@ export default async function BrandDashboard({
   const period: PeriodKey = isPeriodKey(periodParam) ? periodParam : "week";
   const range = getPeriodRange(period);
   const leadsPer = parseWebLeadPageSize(leadsPerParam);
-  const defaultLeadsRange = orderedDateRange(range.start, utcTodayIso());
+  const defaultLeadsRange = orderedDateRange(range.start, clampToToday(range.end));
   const leadsRange = orderedDateRange(
     isIsoDate(leadsFromParam) ? leadsFromParam : defaultLeadsRange.start,
     isIsoDate(leadsToParam) ? leadsToParam : defaultLeadsRange.end,
@@ -96,7 +96,7 @@ export default async function BrandDashboard({
   }
 
   const [metrics, recentLeads, webLeads] = await Promise.all([
-    getBrandPeriodMetrics(brand.id as string, range),
+    getBrandPeriodMetrics(brand.id as string, range, period),
     listRecentLeads(brand.id as string),
     listWebLeadsPage({
       brandId: brand.id as string,
