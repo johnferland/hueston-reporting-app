@@ -1,4 +1,4 @@
-export { Button } from "./button";
+export { Button, buttonClassName } from "./button";
 export { Field, Input, Select } from "./field";
 export { Card, Panel } from "./card";
 export { Page, PageHeader, Section, Alert, TextMuted } from "./page";

@@ -64,8 +64,7 @@ export function AppNav({
   return (
     <Nav>
       <NavBrand href={homeHref}>
-        <img src="/brand/icon-outline-cream.svg" alt="" className="ds-nav-mark" />
-        SA Group
+        <img src="/brand/specialty-logo-cream.png" alt="Specialty" className="ds-nav-logo" />
       </NavBrand>
 
       {!isLab ? (

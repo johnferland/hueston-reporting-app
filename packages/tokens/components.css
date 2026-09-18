@@ -1,18 +1,38 @@
 /**
  * Component tokens — local aliases so buttons/nav/cards can diverge from
  * the global radius or accent later without rewriting JSX.
+ *
+ * `--button-*` is the single visual recipe for every control that uses
+ * `.ds-button` (actions, nav items, tabs). Variants only remap fill/ink.
  */
 :root {
   --button-bg: var(--color-accent);
   --button-bg-hover: var(--color-accent-hover);
   --button-fg: var(--color-on-accent);
+  --button-fg-hover: var(--button-fg);
+  --button-border: transparent;
   --button-radius: var(--radius-md);
   --button-px: var(--space-4);
   --button-height: var(--control-height);
   --button-min-width: 10rem;
   --button-weight: var(--weight-semibold);
+  --button-size: var(--text-sm);
+  --button-tracking: var(--label-tracking);
+  --button-transform: uppercase;
+  --button-gap: var(--space-3);
   --panel-list-gap: var(--space-8);
-  --button-fg-hover: var(--button-fg);
+
+  --button-secondary-bg: var(--color-accent-subtle);
+  --button-secondary-bg-hover: color-mix(in srgb, var(--color-accent) 22%, var(--color-accent-subtle));
+  --button-secondary-fg: var(--color-text);
+  --button-secondary-fg-hover: var(--color-text);
+  --button-secondary-border: transparent;
+
+  --button-ghost-bg: transparent;
+  --button-ghost-bg-hover: var(--color-bg-subtle);
+  --button-ghost-fg: var(--color-text);
+  --button-ghost-fg-hover: var(--color-text);
+  --button-ghost-border: transparent;
 
   --input-bg: var(--color-surface);
   --input-border: var(--color-border-strong);
@@ -29,9 +49,12 @@
   --nav-border: var(--color-border);
   --nav-fg: var(--color-text);
   --nav-muted: var(--color-text-muted);
-  --nav-active: var(--color-accent);
-  --nav-active-fg: var(--color-on-accent);
+  --nav-active: var(--button-bg);
+  --nav-active-fg: var(--button-fg);
   --nav-item-hover: var(--color-bg-subtle);
+  --nav-item-height: var(--button-height);
+  --nav-item-radius: var(--button-radius);
+  --nav-logo-height: 2rem;
 
   --menu-bg: var(--color-surface);
   --menu-border: var(--color-border);

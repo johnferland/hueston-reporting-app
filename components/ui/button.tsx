@@ -2,32 +2,36 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
-type Variant = "primary" | "secondary" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "ghost";
 
-const variantClass: Record<Variant, string> = {
+const variantClass: Record<ButtonVariant, string> = {
   primary: "ds-button",
   secondary: "ds-button ds-button-secondary",
   ghost: "ds-button ds-button-ghost",
 };
 
+export function buttonClassName(variant: ButtonVariant = "primary", className?: string) {
+  return cn(variantClass[variant], className);
+}
+
 type Props = {
   children: ReactNode;
-  variant?: Variant;
+  variant?: ButtonVariant;
   className?: string;
   href?: string;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
-export function Button({ children, variant = "primary", className, href, type = "submit", ...rest }: Props) {
-  const classes = cn(variantClass[variant], className);
+export function Button({ children, variant = "primary", className, href, type = "submit", title, ...rest }: Props) {
+  const classes = buttonClassName(variant, className);
   if (href) {
     return (
-      <Link href={href} className={classes}>
+      <Link href={href} className={classes} title={title}>
         {children}
       </Link>
     );
   }
   return (
-    <button type={type} className={classes} {...rest}>
+    <button type={type} className={classes} title={title} {...rest}>
       {children}
     </button>
   );

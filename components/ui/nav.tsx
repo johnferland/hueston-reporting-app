@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { Button, buttonClassName } from "@/components/ui/button";
 
 export function Shell({ children }: { children: ReactNode }) {
   return <div className="ds-shell">{children}</div>;
@@ -43,10 +43,10 @@ export function NavLink({
   children: ReactNode;
 }) {
   return (
-    <Link href={href} className={cn("ds-nav-link", active && "ds-nav-link-active")}>
+    <Button href={href} variant={active ? "primary" : "secondary"}>
       {icon ? <span className="ds-nav-icon">{icon}</span> : null}
       {children}
-    </Link>
+    </Button>
   );
 }
 
@@ -63,7 +63,7 @@ export function NavMenu({
 }) {
   return (
     <details className="ds-menu" open={defaultOpen || undefined}>
-      <summary className="ds-nav-link ds-menu-trigger">
+      <summary className={buttonClassName("secondary", "ds-menu-trigger")}>
         {icon ? <span className="ds-nav-icon">{icon}</span> : null}
         {label}
       </summary>
@@ -84,9 +84,9 @@ export function NavMenuItem({
   children: ReactNode;
 }) {
   return (
-    <Link href={href} className={cn("ds-menu-item", active && "ds-menu-item-active")} title={title}>
+    <Button href={href} variant={active ? "primary" : "secondary"} title={title}>
       {children}
-    </Link>
+    </Button>
   );
 }
 

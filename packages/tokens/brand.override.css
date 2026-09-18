@@ -28,6 +28,7 @@
   --page-dark-bloom-alt: radial-gradient(900px 700px at 10% 90%, rgba(11, 77, 56, 0.45) 0%, rgba(20, 28, 36, 0) 72%);
 
   --brand-grain: url("/brand/grain.png");
+  --brand-logo-nav: url("/brand/specialty-logo-cream.png");
   --brand-glyph-cream: url("/brand/icon-outline-cream.svg");
   --brand-glyph-ink: url("/brand/icon-outline-ink.svg");
 
@@ -63,7 +64,9 @@
 
   --button-radius: var(--radius-full);
   --button-height: 3rem;
+  --button-px: var(--space-6);
   --button-weight: var(--weight-semibold);
+  --button-tracking: 0.06em;
   --button-fg-hover: var(--color-on-accent-hover);
 
   --input-bg: var(--cream);
@@ -79,11 +82,10 @@
   --nav-border: transparent;
   --nav-fg: var(--cream);
   --nav-muted: var(--mist);
-  --nav-active: var(--specialty-green);
-  --nav-active-fg: var(--ink);
+  --nav-active: var(--button-bg);
+  --nav-active-fg: var(--button-fg);
   --nav-item-hover: var(--kelp);
   --nav-width: 20rem;
-  --nav-item-radius: var(--radius-sm);
 
   --table-bg: var(--cream);
 }
