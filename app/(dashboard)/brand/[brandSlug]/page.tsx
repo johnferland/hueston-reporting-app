@@ -142,9 +142,9 @@ export default async function BrandDashboard({
       <Section title="Leads">
         <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
-          <MetricCard label="Total leads" metric={metrics.totalLeads} />
-          <MetricCard label="Web leads" metric={metrics.webLeads} />
-          <MetricCard label="Offline leads" metric={metrics.offlineLeads} />
+          <MetricCard label="Total leads" hint="totalLeads" metric={metrics.totalLeads} />
+          <MetricCard label="Web leads" hint="webLeads" metric={metrics.webLeads} />
+          <MetricCard label="Offline leads" hint="offlineLeads" metric={metrics.offlineLeads} />
         </div>
       </Section>
 
@@ -153,40 +153,40 @@ export default async function BrandDashboard({
           {periodLabel}. Keywords and avg. position are snapshot {metrics.snapshotCurrent} vs {metrics.snapshotPrevious}.
         </TextMuted>
         <div className="ds-grid">
-          <MetricCard label="Keywords top 3" metric={metrics.keywordsTop3} />
-          <MetricCard label="Organic reach" metric={metrics.organicReach} />
-          <MetricCard label="Organic traffic" metric={metrics.organicTraffic} />
-          <MetricCard label="New users" metric={metrics.newUsers} />
-          <MetricCard label="Total keywords" metric={metrics.totalKeywords} />
-          <MetricCard label="Clicks" metric={metrics.clicks} />
-          <MetricCard label="Impressions" metric={metrics.impressions} />
-          <MetricCard label="CTR" metric={metrics.ctr} digits={1} suffix="%" />
-          <MetricCard label="Avg. position" metric={metrics.avgPosition} digits={1} lowerIsBetter />
+          <MetricCard label="Keywords top 3" hint="keywordsTop3" metric={metrics.keywordsTop3} />
+          <MetricCard label="Organic reach" hint="organicReach" metric={metrics.organicReach} />
+          <MetricCard label="Organic traffic" hint="organicTraffic" metric={metrics.organicTraffic} />
+          <MetricCard label="New users" hint="newUsers" metric={metrics.newUsers} />
+          <MetricCard label="Total keywords" hint="totalKeywords" metric={metrics.totalKeywords} />
+          <MetricCard label="Clicks" hint="searchClicks" metric={metrics.clicks} />
+          <MetricCard label="Impressions" hint="searchImpressions" metric={metrics.impressions} />
+          <MetricCard label="CTR" hint="searchCtr" metric={metrics.ctr} digits={1} suffix="%" />
+          <MetricCard label="Avg. position" hint="avgPosition" metric={metrics.avgPosition} digits={1} lowerIsBetter />
         </div>
       </Section>
 
       <Section title="Google Ads">
         <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
-          <MetricCard label="Ad spend" metric={metrics.googleSpend} digits={2} prefix="$" lowerIsBetter />
-          <MetricCard label="Impressions" metric={metrics.googleImpressions} />
-          <MetricCard label="Clicks" metric={metrics.googleClicks} />
-          <MetricCard label="CPC" metric={metrics.googleCpc} digits={2} prefix="$" lowerIsBetter />
-          <MetricCard label="Conversions" metric={metrics.googleConversions} />
-          <MetricCard label="Cost per conversion" metric={metrics.googleCostPerConversion} digits={2} prefix="$" lowerIsBetter />
+          <MetricCard label="Ad spend" hint="googleSpend" metric={metrics.googleSpend} digits={2} prefix="$" lowerIsBetter />
+          <MetricCard label="Impressions" hint="googleImpressions" metric={metrics.googleImpressions} />
+          <MetricCard label="Clicks" hint="googleClicks" metric={metrics.googleClicks} />
+          <MetricCard label="CPC" hint="googleCpc" metric={metrics.googleCpc} digits={2} prefix="$" lowerIsBetter />
+          <MetricCard label="Conversions" hint="googleConversions" metric={metrics.googleConversions} />
+          <MetricCard label="Cost per conversion" hint="googleCostPerConversion" metric={metrics.googleCostPerConversion} digits={2} prefix="$" lowerIsBetter />
         </div>
       </Section>
 
       <Section title="Meta Ads">
         <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
-          <MetricCard label="Ad spend" metric={metrics.metaSpend} digits={2} prefix="$" lowerIsBetter />
-          <MetricCard label="Impressions" metric={metrics.metaImpressions} />
-          <MetricCard label="Clicks" metric={metrics.metaClicks} />
-          <MetricCard label="CPC" metric={metrics.metaCpc} digits={2} prefix="$" lowerIsBetter />
-          <MetricCard label="Leads" metric={metrics.metaLeads} />
-          <MetricCard label="CTR" metric={metrics.metaCtr} digits={2} suffix="%" />
-          <MetricCard label="Cost per lead" metric={metrics.metaCostPerLead} digits={2} prefix="$" lowerIsBetter />
+          <MetricCard label="Ad spend" hint="metaSpend" metric={metrics.metaSpend} digits={2} prefix="$" lowerIsBetter />
+          <MetricCard label="Impressions" hint="metaImpressions" metric={metrics.metaImpressions} />
+          <MetricCard label="Clicks" hint="metaClicks" metric={metrics.metaClicks} />
+          <MetricCard label="CPC" hint="metaCpc" metric={metrics.metaCpc} digits={2} prefix="$" lowerIsBetter />
+          <MetricCard label="Leads" hint="metaLeads" metric={metrics.metaLeads} />
+          <MetricCard label="CTR" hint="metaCtr" metric={metrics.metaCtr} digits={2} suffix="%" />
+          <MetricCard label="Cost per lead" hint="metaCostPerLead" metric={metrics.metaCostPerLead} digits={2} prefix="$" lowerIsBetter />
         </div>
       </Section>
 
@@ -195,9 +195,14 @@ export default async function BrandDashboard({
           Account snapshot {metrics.snapshotCurrent} vs {metrics.snapshotPrevious}
         </TextMuted>
         <div className="ds-grid">
-          <MetricCard label="Total AI referral traffic" metric={metrics.aiTotal} />
+          <MetricCard label="Total AI referral traffic" hint="aiTotal" metric={metrics.aiTotal} />
           {AI_REFERRAL_PATTERNS.map((pattern) => (
-            <MetricCard key={pattern.key} label={pattern.label} metric={metrics.aiReferrals[pattern.key]} />
+            <MetricCard
+              key={pattern.key}
+              label={pattern.label}
+              hint={pattern.key}
+              metric={metrics.aiReferrals[pattern.key]}
+            />
           ))}
         </div>
       </Section>
