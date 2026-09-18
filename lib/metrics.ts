@@ -335,8 +335,12 @@ export async function getBrandPeriodMetrics(
 
   const currentGa4 = through(ga4Rows, asOf.current);
   const previousGa4 = through(ga4Rows, asOf.previous);
+  const currentGa4Period = inRange(ga4Rows, periodRange);
+  const previousGa4Period = inRange(ga4Rows, previousRange);
   const currentGsc = through(gscRows, asOf.current);
   const previousGsc = through(gscRows, asOf.previous);
+  const currentGscPeriod = inRange(gscRows, periodRange);
+  const previousGscPeriod = inRange(gscRows, previousRange);
   const currentLeads = inRange(leadRows, periodRange);
   const previousLeads = inRange(leadRows, previousRange);
   const currentAds = inRange(adsRows, periodRange);
@@ -360,8 +364,10 @@ export async function getBrandPeriodMetrics(
     };
   };
 
-  const currentSeo = gscRollup(currentGsc, asOf.current);
-  const previousSeo = gscRollup(previousGsc, asOf.previous);
+  const currentSeo = gscRollup(currentGscPeriod, periodRange.end);
+  const previousSeo = gscRollup(previousGscPeriod, previousRange.end);
+  const currentSeoSnapshot = gscRollup(currentGsc, asOf.current);
+  const previousSeoSnapshot = gscRollup(previousGsc, asOf.previous);
 
   const currentGoogle = adsSlice(currentAds, "google");
   const previousGoogle = adsSlice(previousAds, "google");
@@ -385,20 +391,20 @@ export async function getBrandPeriodMetrics(
     sessions: metric(sum(currentGa4.map((row) => Number(row.sessions ?? 0))), sum(previousGa4.map((row) => Number(row.sessions ?? 0)))),
     conversions: metric(sum(currentGa4.map((row) => Number(row.conversions ?? 0))), sum(previousGa4.map((row) => Number(row.conversions ?? 0)))),
     organicTraffic: metric(
-      sum(currentGa4.map((row) => Number(row.organic_sessions ?? 0))),
-      sum(previousGa4.map((row) => Number(row.organic_sessions ?? 0))),
+      sum(currentGa4Period.map((row) => Number(row.organic_sessions ?? 0))),
+      sum(previousGa4Period.map((row) => Number(row.organic_sessions ?? 0))),
     ),
     newUsers: metric(
-      sum(currentGa4.map((row) => Number(row.new_users ?? 0))),
-      sum(previousGa4.map((row) => Number(row.new_users ?? 0))),
+      sum(currentGa4Period.map((row) => Number(row.new_users ?? 0))),
+      sum(previousGa4Period.map((row) => Number(row.new_users ?? 0))),
     ),
     clicks: metric(currentSeo.clicks, previousSeo.clicks),
     impressions: metric(currentSeo.impressions, previousSeo.impressions),
     organicReach: metric(currentSeo.impressions, previousSeo.impressions),
     ctr: metric(currentSeo.ctr * 100, previousSeo.ctr * 100),
-    avgPosition: metric(currentSeo.avgPosition, previousSeo.avgPosition),
-    keywordsTop3: metric(currentSeo.keywordsTop3, previousSeo.keywordsTop3),
-    totalKeywords: metric(currentSeo.totalKeywords, previousSeo.totalKeywords),
+    avgPosition: metric(currentSeoSnapshot.avgPosition, previousSeoSnapshot.avgPosition),
+    keywordsTop3: metric(currentSeoSnapshot.keywordsTop3, previousSeoSnapshot.keywordsTop3),
+    totalKeywords: metric(currentSeoSnapshot.totalKeywords, previousSeoSnapshot.totalKeywords),
     googleSpend: metric(currentGoogle.spend, previousGoogle.spend),
     googleImpressions: metric(currentGoogle.impressions, previousGoogle.impressions),
     googleClicks: metric(currentGoogle.clicks, previousGoogle.clicks),

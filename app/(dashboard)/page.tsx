@@ -41,7 +41,7 @@ export default async function DashboardHome({
     <Page>
       <PageHeader
         title="Executive rollup"
-        description={`Search snapshot ${asOf.current} vs ${asOf.previous}. Leads and ads are ${range.start} – ${range.end}. Open a brand for the full dashboard.`}
+        description={`Activity ${range.start} – ${range.end}. Keyword snapshot ${asOf.current} vs ${asOf.previous}. Open a brand for the full dashboard.`}
         actions={<PeriodToggle current={period} basePath="/" />}
       />
 

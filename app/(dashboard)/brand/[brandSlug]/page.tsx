@@ -150,7 +150,7 @@ export default async function BrandDashboard({
 
       <Section title="Search">
         <TextMuted>
-          Account snapshot {metrics.snapshotCurrent} vs {metrics.snapshotPrevious}
+          {periodLabel}. Keywords and avg. position are snapshot {metrics.snapshotCurrent} vs {metrics.snapshotPrevious}.
         </TextMuted>
         <div className="ds-grid">
           <MetricCard label="Keywords top 3" metric={metrics.keywordsTop3} />
