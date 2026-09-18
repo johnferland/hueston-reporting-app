@@ -1,14 +1,62 @@
 /**
- * Drop Claude Design / brand-site tokens here when they exist.
- * Override semantic names (--color-accent, --font-sans, --radius-md, etc.)
- * so every .ds-* component picks them up without a JSX change.
+ * Specialty brand identity v1 — September 2026
  *
- * Example:
- *   :root {
- *     --color-accent: var(--sa-group-primary);
- *     --font-sans: var(--sa-group-font);
- *     --radius-md: var(--sa-group-radius);
- *   }
+ * Change palette, type, and radius here. `.ds-*` components only read semantic
+ * names, so a later deck drop is this file plus the Geist import in layout.
+ *
+ * Green is a signal, not a surface. Primary actions use Specialty Green with
+ * Ink type (white on this green fails contrast). Success/delta stays a
+ * separate green so brand accent does not mean "up".
  */
 :root {
+  --specialty-green: #22bc7e;
+  --specialty-green-hover: #1a9e68;
+  --specialty-ink: #222c37;
+  --specialty-cream: #fffaf2;
+  --specialty-mist: #e3e9eb;
+  --specialty-sand: #f0ebe3;
+
+  --color-bg: var(--specialty-cream);
+  --color-bg-subtle: var(--specialty-mist);
+  --color-surface: var(--specialty-sand);
+  --color-text: var(--specialty-ink);
+  --color-text-muted: color-mix(in srgb, var(--specialty-ink) 58%, var(--specialty-cream));
+  --color-border: color-mix(in srgb, var(--specialty-ink) 10%, var(--specialty-mist));
+  --color-border-strong: color-mix(in srgb, var(--specialty-ink) 18%, var(--specialty-mist));
+
+  --color-accent: var(--specialty-green);
+  --color-accent-hover: var(--specialty-green-hover);
+  --color-accent-subtle: color-mix(in srgb, var(--specialty-green) 14%, var(--specialty-cream));
+  --color-on-accent: var(--specialty-ink);
+
+  --color-success: var(--green-600);
+  --color-danger: var(--red-600);
+
+  --font-sans: var(--font-geist-sans, "Geist"), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
+
+  --heading-weight: var(--weight-medium);
+  --heading-tracking: -0.03em;
+  --label-weight: var(--weight-medium);
+  --label-tracking: 0.04em;
+
+  --radius-sm: 0.75rem;
+  --radius-md: 1.25rem;
+  --radius-lg: 1.25rem;
+  --radius-full: 999px;
+
+  --button-radius: var(--radius-full);
+  --button-height: 3rem;
+  --button-weight: var(--weight-semibold);
+
+  --input-radius: var(--radius-md);
+  --card-radius: var(--radius-lg);
+  --card-shadow: none;
+  --menu-radius: var(--radius-md);
+
+  --nav-bg: var(--specialty-ink);
+  --nav-border: transparent;
+  --nav-fg: var(--specialty-cream);
+  --nav-muted: color-mix(in srgb, var(--specialty-cream) 62%, var(--specialty-ink));
+  --nav-active: var(--specialty-green);
 }

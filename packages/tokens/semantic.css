@@ -37,6 +37,11 @@
   --weight-semibold: 600;
   --weight-bold: 700;
 
+  --heading-weight: var(--weight-bold);
+  --heading-tracking: -0.02em;
+  --label-weight: var(--weight-medium);
+  --label-tracking: 0;
+
   --page-max: 72rem;
   --page-pad-x: var(--space-8);
   --page-pad-y: var(--space-6);

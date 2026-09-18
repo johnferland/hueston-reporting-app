@@ -22,6 +22,11 @@ they read CSS variables from here.
 4. Do not restyle individual React files. If a component looks wrong after a
    token drop, the mapping is incomplete — add the semantic alias.
 
+Specialty v1 (September 2026) is mapped in `brand.override.css`. Change
+`--specialty-green`, `--specialty-ink`, `--specialty-cream`, type tracking, and
+radii there. Geist is loaded in `app/layout.tsx`. Labs inherit the parent
+accent until `[data-brand]` overrides exist.
+
 ## Layers
 
 | File | Role |
