@@ -1,0 +1,98 @@
+/**
+ * Specialty surfaces — exact deck values. Use these classes on ds-* shells;
+ * do not copy the gradients into pages.
+ *
+ * Light: ds-surface-wash | ds-surface-mint | ds-surface-sand
+ * Dark:  ds-surface-dark | ds-page-dark | ds-page-dark-alt | ds-page-dark-grain
+ * Texture: ds-grain (dark only)
+ * Mark: ds-corner-glyph | ds-corner-glyph-tight  (cream glyph on dark, ink on light)
+ */
+
+.ds-surface-wash {
+  background: var(--surface-wash);
+}
+
+.ds-surface-mint {
+  background: var(--surface-mint);
+}
+
+.ds-surface-sand {
+  background: var(--surface-sand);
+}
+
+.ds-surface-dark {
+  background: var(--surface-dark);
+}
+
+.ds-page-dark {
+  background-color: var(--carbon);
+  background-image: var(--page-dark-bloom);
+  background-repeat: no-repeat;
+}
+
+.ds-page-dark-alt {
+  background-color: var(--carbon);
+  background-image: var(--page-dark-bloom-alt);
+  background-repeat: no-repeat;
+}
+
+.ds-grain {
+  position: relative;
+  isolation: isolate;
+}
+
+.ds-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--brand-grain);
+  background-size: 260px 260px;
+  background-repeat: repeat;
+  opacity: 0.7;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ds-page-dark-grain {
+  background-color: var(--carbon);
+  background-image: var(--brand-grain), var(--page-dark-bloom);
+  background-size: 260px 260px, auto;
+  background-position: 0 0, center;
+  background-repeat: repeat, no-repeat;
+}
+
+.ds-corner-glyph {
+  position: relative;
+  overflow: hidden;
+}
+
+.ds-corner-glyph::before {
+  content: "";
+  position: absolute;
+  right: -96px;
+  bottom: -190px;
+  width: 620px;
+  height: 710px;
+  background-image: var(--brand-glyph-ink);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: right bottom;
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ds-page-dark.ds-corner-glyph::before,
+.ds-page-dark-alt.ds-corner-glyph::before,
+.ds-page-dark-grain.ds-corner-glyph::before,
+.ds-surface-dark.ds-corner-glyph::before {
+  background-image: var(--brand-glyph-cream);
+}
+
+.ds-corner-glyph-tight::before {
+  right: -215px;
+  bottom: -150px;
+  width: 340px;
+  height: 390px;
+}

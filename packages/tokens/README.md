@@ -22,10 +22,10 @@ they read CSS variables from here.
 4. Do not restyle individual React files. If a component looks wrong after a
    token drop, the mapping is incomplete — add the semantic alias.
 
-Specialty v1 (September 2026) is mapped in `brand.override.css`. Change
-`--specialty-green`, `--specialty-ink`, `--specialty-cream`, type tracking, and
-radii there. Geist is loaded in `app/layout.tsx`. Labs inherit the parent
-accent until `[data-brand]` overrides exist.
+Specialty v1 (September 2026) lives in `brand.override.css` (palette, type,
+radius) and `surfaces.css` (washes, dark grounds, grain, corner glyph).
+Replace `/public/brand/grain.png` and the outline SVGs with production files
+when they arrive — class names stay the same.
 
 ## Layers
 
@@ -35,6 +35,7 @@ accent until `[data-brand]` overrides exist.
 | `semantic.css` | Intent names used by UI (`--color-accent`, `--color-text`, …). |
 | `components.css` | Button, input, card, nav, menu aliases. |
 | `brands.css` | Per-lab accent only. |
+| `surfaces.css` | Washes, dark grounds, grain, corner glyph (`ds-surface-*`). |
 | `brand.override.css` | **Drop the live SA Group system here.** |
 
 UI lives in `components/ui`. Class prefix: `ds-`.

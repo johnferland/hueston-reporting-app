@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 export function Nav({ children }: { children: ReactNode }) {
-  return <header className="ds-nav">{children}</header>;
+  return <header className="ds-nav ds-grain">{children}</header>;
 }
 
 export function NavBrand({ href, children }: { href: string; children: ReactNode }) {

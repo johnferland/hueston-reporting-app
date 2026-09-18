@@ -1,36 +1,52 @@
 /**
- * Specialty brand identity v1 — September 2026
- *
- * Change palette, type, and radius here. `.ds-*` components only read semantic
- * names, so a later deck drop is this file plus the Geist import in layout.
- *
- * Green is a signal, not a surface. Primary actions use Specialty Green with
- * Ink type (white on this green fails contrast). Success/delta stays a
- * separate green so brand accent does not mean "up".
+ * Specialty brand identity v1 — surfaces from the identity deck.
+ * Values are exact; do not re-derive or re-tint. Change this file when
+ * production assets replace the local grain/glyph files.
  */
 :root {
   --specialty-green: #22bc7e;
-  --specialty-green-hover: #1a9e68;
-  --specialty-ink: #222c37;
-  --specialty-cream: #fffaf2;
-  --specialty-mist: #e3e9eb;
-  --specialty-sand: #f0ebe3;
+  --carbon: #141c24;
+  --ink: #222c37;
+  --cream: #fffaf2;
+  --mist: #e3e9eb;
+  --sand: #f0ebe3;
+  --kelp: #0b4d38;
+  --mint: #cbebda;
+  --slate: #5a6570;
+  --clay: #c4785a;
 
-  --color-bg: var(--specialty-cream);
-  --color-bg-subtle: var(--specialty-mist);
-  --color-surface: var(--specialty-sand);
-  --color-text: var(--specialty-ink);
-  --color-text-muted: color-mix(in srgb, var(--specialty-ink) 58%, var(--specialty-cream));
-  --color-border: color-mix(in srgb, var(--specialty-ink) 10%, var(--specialty-mist));
-  --color-border-strong: color-mix(in srgb, var(--specialty-ink) 18%, var(--specialty-mist));
+  --specialty-ink: var(--ink);
+  --specialty-cream: var(--cream);
+  --specialty-mist: var(--mist);
+  --specialty-sand: var(--sand);
+
+  --surface-wash: linear-gradient(135deg, #fffaf2 0%, #eff4f4 48%, #e3e9eb 100%);
+  --surface-mint: linear-gradient(135deg, #f4fbf7 0%, #dff1e8 55%, #cbebda 100%);
+  --surface-sand: linear-gradient(135deg, #f0ebe3 0%, #f7f3ec 50%, #fffaf2 100%);
+  --surface-dark: linear-gradient(140deg, #141c24 0%, #1b2a2a 62%, #0b4d38 140%);
+  --page-dark-bloom: radial-gradient(1100px 780px at 88% 12%, rgba(11, 77, 56, 0.5) 0%, rgba(20, 28, 36, 0) 70%);
+  --page-dark-bloom-alt: radial-gradient(900px 700px at 10% 90%, rgba(11, 77, 56, 0.45) 0%, rgba(20, 28, 36, 0) 72%);
+
+  --brand-grain: url("/brand/grain.png");
+  --brand-glyph-cream: url("/brand/icon-outline-cream.svg");
+  --brand-glyph-ink: url("/brand/icon-outline-ink.svg");
+
+  --color-bg: var(--cream);
+  --color-bg-subtle: var(--mist);
+  --color-surface: var(--sand);
+  --color-text: var(--ink);
+  --color-text-muted: var(--slate);
+  --color-border: var(--mist);
+  --color-border-strong: var(--slate);
 
   --color-accent: var(--specialty-green);
-  --color-accent-hover: var(--specialty-green-hover);
-  --color-accent-subtle: color-mix(in srgb, var(--specialty-green) 14%, var(--specialty-cream));
-  --color-on-accent: var(--specialty-ink);
+  --color-accent-hover: var(--kelp);
+  --color-accent-subtle: var(--mint);
+  --color-on-accent: var(--ink);
+  --color-on-accent-hover: var(--cream);
 
-  --color-success: var(--green-600);
-  --color-danger: var(--red-600);
+  --color-success: var(--kelp);
+  --color-danger: var(--clay);
 
   --font-sans: var(--font-geist-sans, "Geist"), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-sans);
@@ -48,15 +64,22 @@
   --button-radius: var(--radius-full);
   --button-height: 3rem;
   --button-weight: var(--weight-semibold);
+  --button-fg-hover: var(--color-on-accent-hover);
 
+  --input-bg: var(--cream);
   --input-radius: var(--radius-md);
+  --card-bg: var(--surface-sand);
   --card-radius: var(--radius-lg);
   --card-shadow: none;
+  --menu-bg: var(--cream);
   --menu-radius: var(--radius-md);
+  --menu-hover: var(--mist);
 
-  --nav-bg: var(--specialty-ink);
+  --nav-bg: var(--surface-dark);
   --nav-border: transparent;
-  --nav-fg: var(--specialty-cream);
-  --nav-muted: color-mix(in srgb, var(--specialty-cream) 62%, var(--specialty-ink));
+  --nav-fg: var(--cream);
+  --nav-muted: var(--mist);
   --nav-active: var(--specialty-green);
+
+  --table-bg: var(--cream);
 }

@@ -1,8 +1,15 @@
 /* Primitive UI styles. All values come from semantic/component tokens. */
 
 .ds-page {
+  position: relative;
   padding: var(--page-pad-y) var(--page-pad-x) var(--space-12);
   max-width: var(--page-max);
+}
+
+.ds-page > *,
+.ds-auth > * {
+  position: relative;
+  z-index: 1;
 }
 
 .ds-page-header {
@@ -69,7 +76,7 @@
 
 .ds-card,
 .ds-panel {
-  background: var(--card-bg);
+  background: var(--surface-sand);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
   padding: var(--card-pad);
@@ -118,7 +125,10 @@
   text-decoration: none;
   cursor: pointer;
 }
-.ds-button:hover { background: var(--button-bg-hover); }
+.ds-button:hover {
+  background: var(--button-bg-hover);
+  color: var(--button-fg-hover, var(--button-fg));
+}
 .ds-button:focus-visible,
 .ds-input:focus-visible,
 .ds-select:focus-visible {
@@ -130,12 +140,12 @@
   color: var(--color-text);
   border: 1px solid var(--color-border-strong);
 }
-.ds-button-secondary:hover { background: var(--color-bg-subtle); }
+.ds-button-secondary:hover { background: var(--color-bg-subtle); color: var(--color-text); }
 .ds-button-ghost {
   background: transparent;
   color: var(--color-text);
 }
-.ds-button-ghost:hover { background: var(--color-bg-subtle); }
+.ds-button-ghost:hover { background: var(--color-bg-subtle); color: var(--color-text); }
 
 .ds-field {
   display: grid;
@@ -170,6 +180,10 @@
   top: 0;
   z-index: 20;
   color: var(--nav-fg);
+}
+.ds-nav > * {
+  position: relative;
+  z-index: 1;
 }
 .ds-nav a,
 .ds-nav-link {
@@ -265,5 +279,4 @@
   display: grid;
   min-height: 100vh;
   place-items: center;
-  background: var(--color-bg);
 }

@@ -11,7 +11,7 @@ export function Page({
   className?: string;
 }) {
   return (
-    <main className={cn("ds-page", className)} data-brand={brand}>
+    <main className={cn("ds-page ds-corner-glyph ds-corner-glyph-tight", className)} data-brand={brand}>
       {children}
     </main>
   );

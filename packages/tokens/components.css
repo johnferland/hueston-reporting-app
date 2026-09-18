@@ -10,6 +10,7 @@
   --button-px: var(--space-4);
   --button-height: var(--control-height);
   --button-weight: var(--weight-semibold);
+  --button-fg-hover: var(--button-fg);
 
   --input-bg: var(--color-surface);
   --input-border: var(--color-border-strong);
