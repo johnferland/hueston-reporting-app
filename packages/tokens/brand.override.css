@@ -80,6 +80,10 @@
   --nav-fg: var(--cream);
   --nav-muted: var(--mist);
   --nav-active: var(--specialty-green);
+  --nav-active-fg: var(--ink);
+  --nav-item-hover: var(--kelp);
+  --nav-width: 15.5rem;
+  --nav-item-radius: var(--radius-sm);
 
   --table-bg: var(--cream);
 }

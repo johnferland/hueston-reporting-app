@@ -28,6 +28,8 @@
   --nav-fg: var(--color-text);
   --nav-muted: var(--color-text-muted);
   --nav-active: var(--color-accent);
+  --nav-active-fg: var(--color-on-accent);
+  --nav-item-hover: var(--color-bg-subtle);
 
   --menu-bg: var(--color-surface);
   --menu-border: var(--color-border);
