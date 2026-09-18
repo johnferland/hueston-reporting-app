@@ -54,6 +54,11 @@
   display: grid;
   gap: var(--space-3);
 }
+.ds-panel-list {
+  display: grid;
+  gap: var(--panel-list-gap);
+  margin-top: var(--space-5);
+}
 
 .ds-row {
   display: flex;
@@ -164,8 +169,39 @@
 }
 .ds-form-grid {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: var(--space-4) var(--space-5);
+}
+.ds-form-grid .ds-input,
+.ds-form-grid .ds-select {
+  width: 100%;
+  min-width: 0;
+}
+.ds-company-actions {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  width: max-content;
+  max-width: 100%;
   gap: var(--space-3);
-  max-width: 26rem;
+  align-items: start;
+}
+.ds-company-actions .ds-button {
+  width: 100%;
+  min-width: var(--button-min-width);
+  box-sizing: border-box;
+}
+.ds-sync-now {
+  display: grid;
+  gap: var(--space-2);
+  width: max-content;
+  max-width: 100%;
+}
+.ds-company-actions .ds-sync-now {
+  width: auto;
+}
+.ds-company-webhook {
+  margin-top: var(--space-6);
 }
 
 .ds-shell {

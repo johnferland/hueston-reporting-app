@@ -36,7 +36,7 @@ export function SyncNowButton({
   }
 
   return (
-    <div className="ds-stack">
+    <div className="ds-sync-now">
       <Button type="button" variant="secondary" disabled={busy} onClick={() => void runSync()}>
         {busy ? "Starting…" : label}
       </Button>

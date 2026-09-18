@@ -9,7 +9,9 @@
   --button-radius: var(--radius-md);
   --button-px: var(--space-4);
   --button-height: var(--control-height);
+  --button-min-width: 10rem;
   --button-weight: var(--weight-semibold);
+  --panel-list-gap: var(--space-8);
   --button-fg-hover: var(--button-fg);
 
   --input-bg: var(--color-surface);

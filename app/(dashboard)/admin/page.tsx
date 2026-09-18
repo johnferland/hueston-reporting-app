@@ -102,52 +102,56 @@ export default async function AdminPage({
           Add a company or paste GA4 / GSC / Ads IDs. Sync now runs in the background so you can keep using the dashboard.
         </TextMuted>
 
-        <Panel>
-          <h3 className="ds-heading-sm">Add a company</h3>
-          <form action={createBrandAction} className="ds-stack">
-            <BrandFormFields />
-            <p>
-              <Button>Add company</Button>
-            </p>
-          </form>
-        </Panel>
-
-        {brands.map((brand) => (
-          <Panel key={brand.id}>
-            <h3 className="ds-heading-sm">{brand.name}</h3>
-            <form action={updateBrandAction} className="ds-stack">
-              <input type="hidden" name="brand_id" value={brand.id} />
-              <BrandFormFields brand={brand} />
-            <div className="ds-row">
-              <Button>Save {brand.name}</Button>
-            </div>
+        <div className="ds-panel-list">
+          <Panel>
+            <h3 className="ds-heading-sm">Add a company</h3>
+            <form action={createBrandAction} className="ds-stack">
+              <BrandFormFields />
+              <div className="ds-company-actions">
+                <Button>Add company</Button>
+              </div>
             </form>
-            <SyncNowButton brandId={brand.id} label="Sync now" />
-            <div className="ds-stack" style={{ marginTop: "var(--space-4)" }}>
-              <h3 className="ds-heading-sm">Web leads webhook</h3>
-              <TextMuted>
-                Point the website form (or Zapier) here. POST JSON or form fields: first_name, last_name,
-                email, date, attribution, count. Header <code>X-Webhook-Secret</code>.
-              </TextMuted>
-              <Field label="Webhook URL">
-                <Input
-                  readOnly
-                  defaultValue={`${process.env.NEXT_PUBLIC_APP_URL ?? ""}/api/webhooks/web-leads/${brand.slug}`}
-                />
-              </Field>
-              <Field label="Secret">
-                <Input
-                  readOnly
-                  defaultValue={brand.web_leads_webhook_secret ?? "Save the company once to generate a secret"}
-                />
-              </Field>
-              <form action={rotateWebLeadsWebhookAction}>
-                <input type="hidden" name="brand_id" value={brand.id} />
-                <Button variant="secondary">Generate / rotate secret</Button>
-              </form>
-            </div>
           </Panel>
-        ))}
+
+          {brands.map((brand) => (
+            <Panel key={brand.id}>
+              <h3 className="ds-heading-sm">{brand.name}</h3>
+              <form action={updateBrandAction} className="ds-stack">
+                <input type="hidden" name="brand_id" value={brand.id} />
+                <BrandFormFields brand={brand} />
+                <div className="ds-company-actions">
+                  <Button>Save {brand.name}</Button>
+                  <SyncNowButton brandId={brand.id} label="Sync now" />
+                </div>
+              </form>
+              <div className="ds-stack ds-company-webhook">
+                <h3 className="ds-heading-sm">Web leads webhook</h3>
+                <TextMuted>
+                  Point the website form (or Zapier) here. POST JSON or form fields: first_name, last_name,
+                  email, date, attribution, count. Header <code>X-Webhook-Secret</code>.
+                </TextMuted>
+                <div className="ds-form-grid">
+                  <Field label="Webhook URL">
+                    <Input
+                      readOnly
+                      defaultValue={`${process.env.NEXT_PUBLIC_APP_URL ?? ""}/api/webhooks/web-leads/${brand.slug}`}
+                    />
+                  </Field>
+                  <Field label="Secret">
+                    <Input
+                      readOnly
+                      defaultValue={brand.web_leads_webhook_secret ?? "Save the company once to generate a secret"}
+                    />
+                  </Field>
+                </div>
+                <form action={rotateWebLeadsWebhookAction}>
+                  <input type="hidden" name="brand_id" value={brand.id} />
+                  <Button variant="secondary">Generate / rotate secret</Button>
+                </form>
+              </div>
+            </Panel>
+          ))}
+        </div>
       </Section>
     </Page>
   );
