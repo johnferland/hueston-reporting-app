@@ -55,6 +55,8 @@
   --nav-item-height: var(--button-height);
   --nav-item-radius: var(--button-radius);
   --nav-logo-height: 2rem;
+  --nav-pad-x: var(--space-5);
+  --nav-min-width: 14rem;
 
   --menu-bg: var(--color-surface);
   --menu-border: var(--color-border);

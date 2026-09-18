@@ -224,7 +224,7 @@
 
 .ds-shell {
   display: grid;
-  grid-template-columns: var(--nav-width) minmax(0, 1fr);
+  grid-template-columns: max-content minmax(0, 1fr);
   min-height: 100vh;
 }
 
@@ -242,9 +242,11 @@
   flex-direction: column;
   align-items: stretch;
   gap: var(--space-2);
-  width: var(--nav-width);
+  box-sizing: border-box;
+  width: max-content;
+  min-width: var(--nav-min-width, var(--nav-width));
   height: 100vh;
-  padding: var(--space-6) var(--space-4) var(--space-5);
+  padding: var(--space-6) var(--nav-pad-x) var(--space-5);
   background: var(--nav-bg);
   border-right: 1px solid var(--nav-border);
   position: sticky;
@@ -254,12 +256,13 @@
   overflow-y: auto;
 }
 .ds-nav .ds-button {
-  width: 100%;
+  width: auto;
   justify-content: flex-start;
 }
 .ds-nav > * {
   position: relative;
   z-index: 1;
+  align-self: stretch;
 }
 .ds-nav-brand {
   display: flex;
@@ -308,6 +311,7 @@
   gap: var(--space-3);
   color: var(--nav-muted);
   font-size: var(--text-xs);
+  min-width: 0;
 }
 .ds-nav-right span {
   padding: 0 var(--space-3);
@@ -332,7 +336,6 @@
   background: transparent;
   border: 0;
   box-shadow: none;
-  min-width: 0;
   position: static;
 }
 

@@ -2,7 +2,7 @@ import { SignIn } from "@clerk/nextjs";
 
 export default function SignInPage() {
   return (
-    <div className="ds-auth ds-page-dark-grain ds-corner-glyph">
+    <div className="ds-auth ds-page-dark">
       <SignIn
         routing="path"
         path="/sign-in"

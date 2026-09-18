@@ -85,7 +85,8 @@
   --nav-active: var(--button-bg);
   --nav-active-fg: var(--button-fg);
   --nav-item-hover: var(--kelp);
-  --nav-width: 20rem;
+  --nav-min-width: 16rem;
+  --nav-pad-x: var(--space-6);
 
   --table-bg: var(--cream);
 }
