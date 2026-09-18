@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import type { AppUser } from "@/lib/auth";
-import type { Brand } from "@/lib/brands";
+import { brandNavLabel, type Brand } from "@/lib/brands";
 import { Nav, NavBrand, NavLink, NavMenu, NavMenuItem, NavRight, NavSection } from "@/components/ui";
 
 function IconGrid() {
@@ -76,8 +76,13 @@ export function AppNav({
           {brands.length ? (
             <NavMenu label="Labs" icon={<IconLabs />} defaultOpen={Boolean(currentBrandSlug)}>
               {brands.map((brand) => (
-                <NavMenuItem key={brand.id} href={`/brand/${brand.slug}`} active={brand.slug === currentBrandSlug}>
-                  {brand.name}
+                <NavMenuItem
+                  key={brand.id}
+                  href={`/brand/${brand.slug}`}
+                  active={brand.slug === currentBrandSlug}
+                  title={brand.name}
+                >
+                  {brandNavLabel(brand)}
                 </NavMenuItem>
               ))}
             </NavMenu>

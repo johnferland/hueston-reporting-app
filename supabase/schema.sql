@@ -7,6 +7,7 @@ create table brands (
   id uuid primary key default gen_random_uuid(),
   slug text unique not null,
   name text not null,
+  nav_abbreviation text,
   domain text not null,
   accent_color text not null,
   logo_url text,

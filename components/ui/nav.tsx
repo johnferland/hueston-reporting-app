@@ -75,14 +75,16 @@ export function NavMenu({
 export function NavMenuItem({
   href,
   active,
+  title,
   children,
 }: {
   href: string;
   active?: boolean;
+  title?: string;
   children: ReactNode;
 }) {
   return (
-    <Link href={href} className={cn("ds-menu-item", active && "ds-menu-item-active")}>
+    <Link href={href} className={cn("ds-menu-item", active && "ds-menu-item-active")} title={title}>
       {children}
     </Link>
   );

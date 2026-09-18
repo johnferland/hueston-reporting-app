@@ -6,6 +6,7 @@ export function BrandFormFields({
   brand?: {
     name: string;
     slug: string;
+    nav_abbreviation: string | null;
     domain: string;
     accent_color: string;
     logo_url: string | null;
@@ -19,6 +20,13 @@ export function BrandFormFields({
     <div className="ds-form-grid">
       <Field label="Name">
         <Input name="name" defaultValue={brand?.name ?? ""} required />
+      </Field>
+      <Field label="Nav abbreviation">
+        <Input
+          name="nav_abbreviation"
+          defaultValue={brand?.nav_abbreviation ?? ""}
+          placeholder="IDA — shown in the sidebar"
+        />
       </Field>
       <Field label="Slug">
         <Input name="slug" defaultValue={brand?.slug ?? ""} placeholder="auto-from-name if left blank on create" />

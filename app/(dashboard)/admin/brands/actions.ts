@@ -13,6 +13,7 @@ function inputFromForm(formData: FormData) {
   return {
     name: formValue(formData, "name"),
     slug: formValue(formData, "slug"),
+    nav_abbreviation: formValue(formData, "nav_abbreviation"),
     domain: formValue(formData, "domain"),
     accent_color: formValue(formData, "accent_color"),
     logo_url: formValue(formData, "logo_url"),

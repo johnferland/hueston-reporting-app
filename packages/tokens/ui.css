@@ -235,6 +235,7 @@
   text-decoration: none;
   color: var(--nav-fg);
   font-size: var(--text-sm);
+  white-space: nowrap;
 }
 .ds-nav-link:hover {
   background: var(--nav-item-hover);
@@ -301,6 +302,7 @@
   text-decoration: none;
   color: var(--nav-fg);
   font-size: var(--text-sm);
+  white-space: nowrap;
 }
 .ds-menu-item:hover {
   background: var(--nav-item-hover);
