@@ -43,7 +43,7 @@ export function NavLink({
   children: ReactNode;
 }) {
   return (
-    <Button href={href} variant={active ? "primary" : "secondary"}>
+    <Button href={href} variant={active ? "primary" : "ghost"}>
       {icon ? <span className="ds-nav-icon">{icon}</span> : null}
       {children}
     </Button>
@@ -63,7 +63,7 @@ export function NavMenu({
 }) {
   return (
     <details className="ds-menu" open={defaultOpen || undefined}>
-      <summary className={buttonClassName("secondary", "ds-menu-trigger")}>
+      <summary className={buttonClassName("ghost", "ds-menu-trigger")}>
         {icon ? <span className="ds-nav-icon">{icon}</span> : null}
         {label}
       </summary>
@@ -84,7 +84,7 @@ export function NavMenuItem({
   children: ReactNode;
 }) {
   return (
-    <Button href={href} variant={active ? "primary" : "secondary"} title={title}>
+    <Button href={href} variant={active ? "primary" : "ghost"} title={title}>
       {children}
     </Button>
   );

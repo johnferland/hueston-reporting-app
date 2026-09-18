@@ -233,14 +233,11 @@
 }
 
 .ds-nav {
-  --button-secondary-bg: var(--nav-item-hover);
-  --button-secondary-bg-hover: color-mix(in srgb, var(--button-bg) 32%, var(--nav-item-hover));
-  --button-secondary-fg: var(--nav-fg);
-  --button-secondary-fg-hover: var(--nav-fg);
-  --button-secondary-border: transparent;
+  --button-ghost-bg: transparent;
   --button-ghost-fg: var(--nav-fg);
-  --button-ghost-fg-hover: var(--nav-fg);
-  --button-ghost-bg-hover: var(--nav-item-hover);
+  --button-ghost-border: transparent;
+  --button-ghost-bg-hover: var(--button-bg);
+  --button-ghost-fg-hover: var(--button-fg);
   display: flex;
   flex-direction: column;
   align-items: stretch;
