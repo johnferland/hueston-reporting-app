@@ -37,11 +37,11 @@
   --brand-glyph-ink: url("/brand/icon-outline-ink.svg");
 
   --color-bg: var(--cream);
-  --color-bg-subtle: var(--mist);
-  --color-surface: var(--sand);
+  --color-bg-subtle: var(--sand);
+  --color-surface: var(--mist);
   --color-text: var(--ink);
   --color-text-muted: var(--slate);
-  --color-border: var(--mist);
+  --color-border: var(--sand);
   --color-border-strong: var(--slate);
 
   --color-accent: var(--specialty-green);
@@ -75,12 +75,12 @@
 
   --input-bg: var(--cream);
   --input-radius: var(--radius-md);
-  --card-bg: var(--sand);
+  --card-bg: var(--mist);
   --card-radius: var(--radius-lg);
   --card-shadow: none;
-  --menu-bg: var(--cream);
+  --menu-bg: var(--mist);
   --menu-radius: var(--radius-md);
-  --menu-hover: var(--mist);
+  --menu-hover: var(--sand);
 
   --nav-bg: var(--carbon);
   --nav-border: transparent;
@@ -92,6 +92,6 @@
   --nav-min-width: 16rem;
   --nav-pad-x: var(--space-6);
 
-  --table-bg: var(--cream);
+  --table-bg: var(--mist);
   --table-rule: var(--slate);
 }
