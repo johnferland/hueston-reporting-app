@@ -20,7 +20,7 @@ html, body {
 
 body {
   font-family: var(--font-sans);
-  background: var(--surface-wash);
+  background: var(--color-bg);
   color: var(--color-text);
   line-height: var(--leading-normal);
 }

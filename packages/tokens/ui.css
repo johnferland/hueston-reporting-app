@@ -81,7 +81,7 @@
 
 .ds-card,
 .ds-panel {
-  background: var(--surface-sand);
+  background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
   padding: var(--card-pad);

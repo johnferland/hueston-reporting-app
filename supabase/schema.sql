@@ -184,7 +184,7 @@ end $$;
 
 -- Seed the four brands (edit accent_color/logo_url once brand assets are ready).
 insert into brands (slug, name, domain, accent_color) values
-  ('sa-appliances', 'SA Appliances', 'specialtyappliances.com', '#0F62FE'),
-  ('odl-ortho', 'ODL Ortho', 'odlortho.com', '#0F62FE'),
-  ('ida', 'International Dental Arts', 'idasmiles.com', '#0F62FE'),
-  ('edl', 'EDL', 'xdentallab.com', '#0F62FE');
+  ('sa-appliances', 'SA Appliances', 'specialtyappliances.com', '#22BC7E'),
+  ('odl-ortho', 'ODL Ortho', 'odlortho.com', '#22BC7E'),
+  ('ida', 'International Dental Arts', 'idasmiles.com', '#22BC7E'),
+  ('edl', 'EDL', 'xdentallab.com', '#22BC7E');

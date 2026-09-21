@@ -65,5 +65,5 @@
   --menu-hover: var(--color-bg-subtle);
 
   --table-bg: var(--color-surface);
-  --table-rule: var(--color-border);
+  --table-rule: var(--color-border-strong);
 }

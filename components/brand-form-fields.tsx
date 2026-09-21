@@ -35,7 +35,7 @@ export function BrandFormFields({
         <Input name="domain" defaultValue={brand?.domain ?? ""} placeholder="example.com" required />
       </Field>
       <Field label="Accent color">
-        <Input name="accent_color" defaultValue={brand?.accent_color ?? "#0F62FE"} />
+        <Input name="accent_color" defaultValue={brand?.accent_color ?? "#22BC7E"} />
       </Field>
       <Field label="Logo URL">
         <Input name="logo_url" type="url" defaultValue={brand?.logo_url ?? ""} />

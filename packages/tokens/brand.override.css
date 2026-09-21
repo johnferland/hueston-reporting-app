@@ -1,31 +1,35 @@
 /**
- * Specialty brand identity v1 — surfaces from the identity deck.
- * Values are exact; do not re-derive or re-tint. Change this file when
- * production assets replace the local grain/glyph files.
+ * Specialty core palette — exact deck values. Do not re-derive or re-tint.
+ *
+ * Core: one accent, two darks, three lights.
+ * Secondary: supporting roles only (depth, tints, rules, diagrams).
  */
 :root {
-  --specialty-green: #22bc7e;
-  --carbon: #141c24;
-  --ink: #222c37;
-  --cream: #fffaf2;
-  --mist: #e3e9eb;
-  --sand: #f0ebe3;
-  --kelp: #0b4d38;
-  --mint: #cbebda;
-  --slate: #5a6570;
-  --clay: #c4785a;
+  /* Core */
+  --specialty-green: #22bc7e; /* mark, primary action, accents */
+  --carbon: #141c24; /* primary dark ground */
+  --ink: #222c37; /* raised dark surfaces, type */
+  --cream: #fffaf2; /* page ground, reversed type */
+  --mist: #e3e9eb; /* logo ground, cool cards */
+  --sand: #f0ebe3; /* warm cards, product tiles */
+
+  /* Secondary */
+  --kelp: #0b4d38; /* gradient depth, charts */
+  --mint: #cbebda; /* tints, quiet highlights */
+  --slate: #5a6570; /* secondary type, rules */
+  --clay: #c4785a; /* diagram accent, sparing */
 
   --specialty-ink: var(--ink);
   --specialty-cream: var(--cream);
   --specialty-mist: var(--mist);
   --specialty-sand: var(--sand);
 
-  --surface-wash: linear-gradient(135deg, #fffaf2 0%, #eff4f4 48%, #e3e9eb 100%);
-  --surface-mint: linear-gradient(135deg, #f4fbf7 0%, #dff1e8 55%, #cbebda 100%);
-  --surface-sand: linear-gradient(135deg, #f0ebe3 0%, #f7f3ec 50%, #fffaf2 100%);
-  --surface-dark: linear-gradient(140deg, #141c24 0%, #1b2a2a 62%, #0b4d38 140%);
-  --page-dark-bloom: radial-gradient(1100px 780px at 88% 12%, rgba(11, 77, 56, 0.5) 0%, rgba(20, 28, 36, 0) 70%);
-  --page-dark-bloom-alt: radial-gradient(900px 700px at 10% 90%, rgba(11, 77, 56, 0.45) 0%, rgba(20, 28, 36, 0) 72%);
+  --surface-wash: linear-gradient(135deg, var(--cream) 0%, var(--mist) 100%);
+  --surface-mint: linear-gradient(135deg, var(--cream) 0%, var(--mint) 100%);
+  --surface-sand: linear-gradient(135deg, var(--sand) 0%, var(--cream) 100%);
+  --surface-dark: linear-gradient(140deg, var(--carbon) 0%, var(--ink) 62%, var(--kelp) 140%);
+  --page-dark-bloom: radial-gradient(1100px 780px at 88% 12%, color-mix(in srgb, var(--kelp) 50%, transparent) 0%, transparent 70%);
+  --page-dark-bloom-alt: radial-gradient(900px 700px at 10% 90%, color-mix(in srgb, var(--kelp) 45%, transparent) 0%, transparent 72%);
 
   --brand-grain: url("/brand/grain.png");
   --brand-logo-nav: url("/brand/specialty-logo-cream.png");
@@ -71,14 +75,14 @@
 
   --input-bg: var(--cream);
   --input-radius: var(--radius-md);
-  --card-bg: var(--surface-sand);
+  --card-bg: var(--sand);
   --card-radius: var(--radius-lg);
   --card-shadow: none;
   --menu-bg: var(--cream);
   --menu-radius: var(--radius-md);
   --menu-hover: var(--mist);
 
-  --nav-bg: var(--surface-dark);
+  --nav-bg: var(--carbon);
   --nav-border: transparent;
   --nav-fg: var(--cream);
   --nav-muted: var(--mist);
@@ -89,4 +93,5 @@
   --nav-pad-x: var(--space-6);
 
   --table-bg: var(--cream);
+  --table-rule: var(--slate);
 }

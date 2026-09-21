@@ -82,14 +82,14 @@ function normalizeBrandInput(input: BrandInput) {
   const name = input.name.trim();
   const domain = input.domain.trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
   const slug = slugify(input.slug?.trim() || name);
-  const accent_color = (input.accent_color?.trim() || "#0F62FE").toUpperCase();
+  const accent_color = (input.accent_color?.trim() || "#22BC7E").toUpperCase();
   const nav_abbreviation = emptyToNull(input.nav_abbreviation);
 
   if (!name) throw new Error("Name is required.");
   if (!domain) throw new Error("Domain is required.");
   if (!slug) throw new Error("Could not build a slug from that name.");
   if (!/^#[0-9A-F]{6}$/.test(accent_color)) {
-    throw new Error("Accent color must be a hex value like #0F62FE.");
+    throw new Error("Accent color must be a hex value like #22BC7E.");
   }
 
   return {
