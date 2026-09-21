@@ -79,6 +79,8 @@
   --card-bg: var(--mist);
   --card-radius: var(--radius-lg);
   --card-shadow: none;
+  --card-frame-bg: var(--cream);
+  --card-frame-border: var(--mist);
   --menu-bg: var(--mist);
   --menu-radius: var(--radius-md);
   --menu-hover: var(--sand);

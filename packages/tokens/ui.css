@@ -97,6 +97,10 @@
 .ds-card-link:hover {
   border-color: var(--color-accent);
 }
+.ds-card-frame {
+  background: var(--card-frame-bg);
+  border-color: var(--card-frame-border);
+}
 
 .ds-metric-label {
   margin: 0;

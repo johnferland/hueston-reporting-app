@@ -44,6 +44,8 @@
   --card-radius: var(--radius-lg);
   --card-pad: var(--space-4);
   --card-shadow: var(--shadow-sm);
+  --card-frame-bg: var(--color-bg);
+  --card-frame-border: var(--color-surface);
 
   --nav-bg: var(--color-surface);
   --nav-border: var(--color-border);

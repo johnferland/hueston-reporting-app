@@ -46,10 +46,12 @@ export default async function DashboardHome({
 
       <div className="ds-grid-brands">
         {cards.map(({ brand, metrics }) => (
-          <Card key={brand.id} href={`/brand/${brand.slug}?period=${period}`}>
-            <h2 className="ds-heading-sm">{brand.name}</h2>
-            <TextMuted>{brand.domain}</TextMuted>
-            <div className="ds-stack" style={{ marginTop: "var(--space-3)" }}>
+          <Card key={brand.id} href={`/brand/${brand.slug}?period=${period}`} className="ds-card-frame">
+            <div className="ds-stack">
+              <div>
+                <h2 className="ds-heading-sm">{brand.name}</h2>
+                <TextMuted>{brand.domain}</TextMuted>
+              </div>
               <MetricCard label="Total leads" hint="totalLeads" metric={metrics.totalLeads} />
               <MetricCard label="Organic traffic" hint="organicTraffic" metric={metrics.organicTraffic} />
               <MetricCard label="Top 3 keywords" hint="keywordsTop3" metric={metrics.keywordsTop3} />
