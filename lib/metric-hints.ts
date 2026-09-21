@@ -25,13 +25,13 @@ export const METRIC_HINTS = {
   metaLeads: "Leads attributed to Meta ads this period — paid social demand.",
   metaCtr: "Meta clicks divided by impressions this period — how well the creative earns attention.",
   metaCostPerLead: "Meta spend divided by Meta leads — the cost of each paid social lead.",
-  aiTotal: "Sessions from AI chat tools in this snapshot — whether answer engines are sending people to the lab.",
-  chatgpt: "Sessions referred from ChatGPT — a signal that the assistant is recommending this lab.",
-  gemini: "Sessions referred from Gemini — Google’s AI sending traffic to the site.",
-  perplexity: "Sessions referred from Perplexity — citation traffic from that answer engine.",
-  claude: "Sessions referred from Claude — Anthropic’s assistant sending people to the lab.",
-  copilot: "Sessions referred from Microsoft Copilot — AI search traffic from that assistant.",
-  bing: "Sessions referred from Bing — Microsoft search traffic, including AI-influenced visits.",
+  aiTotal: "Sessions from AI chat tools this period — whether answer engines are sending people to the lab.",
+  chatgpt: "Sessions referred from ChatGPT this period — a signal that the assistant is recommending this lab.",
+  gemini: "Sessions referred from Gemini this period — Google’s AI sending traffic to the site.",
+  perplexity: "Sessions referred from Perplexity this period — citation traffic from that answer engine.",
+  claude: "Sessions referred from Claude this period — Anthropic’s assistant sending people to the lab.",
+  copilot: "Sessions referred from Microsoft Copilot this period — AI search traffic from that assistant.",
+  bing: "Sessions referred from Bing this period — Microsoft search traffic, including AI-influenced visits.",
 } as const;
 
 export type MetricHintId = keyof typeof METRIC_HINTS;

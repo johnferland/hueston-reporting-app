@@ -10,12 +10,11 @@ import {
 import {
   clampToToday,
   currentWeekStart,
+  formatPeriodCaption,
   getPeriodRange,
-  getPreviousPeriodRange,
   isIsoDate,
   isPeriodKey,
   orderedDateRange,
-  PERIOD_LABELS,
   type PeriodKey,
 } from "@/lib/period";
 import { PeriodToggle } from "@/components/period-toggle";
@@ -67,8 +66,7 @@ export default async function BrandDashboard({
   } = await searchParams;
   const period: PeriodKey = isPeriodKey(periodParam) ? periodParam : "week";
   const range = getPeriodRange(period);
-  const previousRange = getPreviousPeriodRange(period);
-  const periodLabel = `${PERIOD_LABELS[period]} ${range.start} – ${range.end} vs ${previousRange.start} – ${previousRange.end}`;
+  const periodLabel = formatPeriodCaption(period, range);
   const leadsPer = parseWebLeadPageSize(leadsPerParam);
   const defaultLeadsRange = orderedDateRange(range.start, clampToToday(range.end));
   const leadsRange = orderedDateRange(
@@ -118,7 +116,7 @@ export default async function BrandDashboard({
     <Page brand={brandSlug}>
       <PageHeader
         title={brand.name as string}
-        description={`${brand.domain as string} · account snapshot ${metrics.snapshotCurrent} vs ${metrics.snapshotPrevious}`}
+        description={brand.domain as string}
         actions={
           <PeriodToggle
             current={period}
@@ -149,9 +147,7 @@ export default async function BrandDashboard({
       </Section>
 
       <Section title="Search">
-        <TextMuted>
-          {periodLabel}. Keywords and avg. position are snapshot {metrics.snapshotCurrent} vs {metrics.snapshotPrevious}.
-        </TextMuted>
+        <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
           <MetricCard label="Keywords top 3" hint="keywordsTop3" metric={metrics.keywordsTop3} />
           <MetricCard label="Organic reach" hint="organicReach" metric={metrics.organicReach} />
@@ -191,9 +187,7 @@ export default async function BrandDashboard({
       </Section>
 
       <Section title="AI visibility">
-        <TextMuted>
-          Account snapshot {metrics.snapshotCurrent} vs {metrics.snapshotPrevious}
-        </TextMuted>
+        <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
           <MetricCard label="Total AI referral traffic" hint="aiTotal" metric={metrics.aiTotal} />
           {AI_REFERRAL_PATTERNS.map((pattern) => (

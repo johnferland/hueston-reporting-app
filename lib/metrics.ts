@@ -373,8 +373,8 @@ export async function getBrandPeriodMetrics(
   const previousGoogle = adsSlice(previousAds, "google");
   const currentMeta = adsSlice(currentAds, "meta");
   const previousMeta = adsSlice(previousAds, "meta");
-  const currentAi = aiBreakdown(currentGa4);
-  const previousAi = aiBreakdown(previousGa4);
+  const currentAi = aiBreakdown(currentGa4Period);
+  const previousAi = aiBreakdown(previousGa4Period);
   const currentAiTotal = sum(Object.values(currentAi));
   const previousAiTotal = sum(Object.values(previousAi));
 

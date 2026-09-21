@@ -21,6 +21,16 @@ export const PERIOD_LABELS: Record<PeriodKey, string> = {
   year: "Year",
 };
 
+/** ISO yyyy-MM-dd → MM/dd/yy */
+export function formatShortDate(iso: string): string {
+  const [year, month, day] = iso.split("-");
+  return `${month}/${day}/${year.slice(2)}`;
+}
+
+export function formatPeriodCaption(period: PeriodKey, range: DateRange): string {
+  return `${PERIOD_LABELS[period]}: ${formatShortDate(range.start)} - ${formatShortDate(range.end)}`;
+}
+
 export function isPeriodKey(value: string | undefined): value is PeriodKey {
   return value === "week" || value === "month" || value === "quarter" || value === "year";
 }
