@@ -350,6 +350,12 @@
   max-width: 100%;
   display: block;
 }
+.ds-logo {
+  height: var(--brand-logo-height);
+  width: auto;
+  max-width: 100%;
+  display: block;
+}
 .ds-nav-label {
   margin: var(--space-4) 0 var(--space-2);
   padding: 0 var(--space-3);
@@ -471,4 +477,10 @@
   display: grid;
   min-height: 100vh;
   place-items: center;
+}
+.ds-auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
 }

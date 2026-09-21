@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import type { AppUser } from "@/lib/auth";
 import { brandNavLabel, type Brand } from "@/lib/brands";
-import { Nav, NavBrand, NavLink, NavMenu, NavMenuItem, NavRight, NavSection } from "@/components/ui";
+import { Logo, Nav, NavBrand, NavLink, NavMenu, NavMenuItem, NavRight, NavSection } from "@/components/ui";
 
 function IconGrid() {
   return (
@@ -64,7 +64,7 @@ export function AppNav({
   return (
     <Nav>
       <NavBrand href={homeHref}>
-        <img src="/brand/specialty-logo-cream.png" alt="Specialty" className="ds-nav-logo" />
+        <Logo className="ds-nav-logo" />
       </NavBrand>
 
       {!isLab ? (
