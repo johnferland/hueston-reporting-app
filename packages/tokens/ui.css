@@ -47,7 +47,12 @@
 }
 
 .ds-section {
+  display: grid;
+  gap: var(--space-5);
   margin: var(--space-8) 0;
+}
+.ds-section > .ds-heading-sm {
+  margin-bottom: 0;
 }
 
 .ds-stack {
@@ -57,7 +62,6 @@
 .ds-panel-list {
   display: grid;
   gap: var(--panel-list-gap);
-  margin-top: var(--space-5);
 }
 
 .ds-row {
@@ -460,7 +464,8 @@
 
 .ds-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   background: var(--table-bg);
   border-radius: var(--card-radius);
   overflow: hidden;
@@ -473,6 +478,9 @@
   font-size: var(--text-sm);
 }
 .ds-table th { color: var(--color-text-muted); font-weight: var(--label-weight); letter-spacing: var(--label-tracking); }
+.ds-table tbody tr:last-child td {
+  border-bottom: none;
+}
 
 .ds-alert-ok { color: var(--color-success); font-weight: var(--weight-semibold); }
 .ds-alert-err { color: var(--color-danger); font-weight: var(--weight-semibold); }
