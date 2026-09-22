@@ -4,8 +4,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SA Group Dashboard",
-  description: "Multi-brand reporting dashboard for the Specialty Appliances Group.",
+  title: "Hueston Reporting",
+  description: "Multi-company reporting dashboard for Hueston.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

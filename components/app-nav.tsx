@@ -73,7 +73,7 @@ export function AppNav({
             Rollup
           </NavLink>
           {brands.length ? (
-            <NavMenu label="Labs" icon={<IconLabs />} defaultOpen={Boolean(currentBrandSlug)}>
+            <NavMenu label="Companies" icon={<IconLabs />} defaultOpen={Boolean(currentBrandSlug)}>
               {brands.map((brand) => (
                 <NavMenuItem
                   key={brand.id}
@@ -103,7 +103,7 @@ export function AppNav({
 
       <NavRight>
         <span>
-          {user.email} · {user.role.replace("_", " ")}
+          {user.email} · {user.role === "lab_manager" ? "company manager" : user.role.replace("_", " ")}
         </span>
         <UserButton />
       </NavRight>

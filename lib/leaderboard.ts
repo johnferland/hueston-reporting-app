@@ -1,5 +1,5 @@
 // Gold/silver/bronze scoring across the five exec metrics. Equal-weighted by default per the
-// project plan — flip WEIGHTS if SA Group wants a weighted scoring model instead.
+// project plan — flip WEIGHTS if Hueston wants a weighted scoring model instead.
 
 export type BrandMetrics = {
   brandId: string;

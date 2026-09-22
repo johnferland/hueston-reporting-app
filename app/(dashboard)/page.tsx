@@ -17,7 +17,7 @@ export default async function DashboardHome({
     if (!user.brand_id) {
       return (
         <Page>
-          <PageHeader title="No lab assigned" description="Ask a Super Admin to assign your email to a company." />
+          <PageHeader title="No company assigned" description="Ask a Super Admin to assign your email to a company." />
         </Page>
       );
     }

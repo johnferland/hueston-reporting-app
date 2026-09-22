@@ -1,28 +1,31 @@
 /**
- * Specialty core palette — exact deck values. Do not re-derive or re-tint.
- *
- * Core: one accent, two darks, three lights.
- * Secondary: supporting roles only (depth, tints, rules, diagrams).
+ * Hueston palette from hueston.co.
+ * Navy #0e234f and spark #de492f are the logo colors.
+ * #000617 and #e9634c are the site's deep navy and coral.
  */
 :root {
   /* Core */
-  --specialty-green: #22bc7e; /* mark, primary action, accents */
-  --carbon: #141c24; /* primary dark ground */
-  --ink: #222c37; /* raised dark surfaces, type */
-  --cream: #fffaf2; /* page ground, reversed type */
-  --mist: #e3e9eb; /* logo ground, cool cards */
-  --sand: #f0ebe3; /* warm cards, product tiles */
+  --hueston-spark: #de492f; /* mark, primary action */
+  --coral: #e9634c; /* site coral */
+  --carbon: #0e234f; /* primary dark ground, wordmark navy */
+  --ink: #0e234f; /* type */
+  --cream: #f4f6fa; /* page ground, reversed type */
+  --mist: #e6ebf4; /* cool cards */
+  --sand: #f3eee9; /* warm cards */
 
   /* Secondary */
-  --kelp: #0b4d38; /* gradient depth, charts */
-  --mint: #cbebda; /* tints, quiet highlights */
-  --slate: #5a6570; /* secondary type, rules */
-  --clay: #c4785a; /* diagram accent, sparing */
+  --kelp: #000617; /* gradient depth */
+  --navy-lift: #1c3d78; /* raised dark, nav hover */
+  --spark-deep: #b83a24; /* accent hover */
+  --mint: #f8e4df; /* spark tint */
+  --slate: #5c6a82; /* secondary type, rules */
+  --clay: #9b2c2c; /* danger, distinct from the spark button */
+  --metric-up: #1f7a4d; /* direction color for gains */
 
-  --specialty-ink: var(--ink);
-  --specialty-cream: var(--cream);
-  --specialty-mist: var(--mist);
-  --specialty-sand: var(--sand);
+  --hueston-ink: var(--ink);
+  --hueston-paper: var(--cream);
+  --hueston-mist: var(--mist);
+  --hueston-sand: var(--sand);
 
   --surface-wash: linear-gradient(135deg, var(--cream) 0%, var(--mist) 100%);
   --surface-mint: linear-gradient(135deg, var(--cream) 0%, var(--mint) 100%);
@@ -32,10 +35,10 @@
   --page-dark-bloom-alt: radial-gradient(900px 700px at 10% 90%, color-mix(in srgb, var(--kelp) 45%, transparent) 0%, transparent 72%);
 
   --brand-grain: url("/brand/grain.png");
-  --brand-logo-nav: url("/brand/specialty-logo.png");
-  --brand-glyph-cream: url("/brand/icon-outline-cream.svg");
-  --brand-glyph-ink: url("/brand/icon-outline-ink.svg");
-  --brand-glyph-green: url("/brand/icon-outline-green.svg");
+  --brand-logo-nav: url("/brand/hueston-logo-light.svg");
+  --brand-glyph-cream: url("/brand/icon-spark-cream.svg");
+  --brand-glyph-ink: url("/brand/icon-spark-ink.svg");
+  --brand-glyph-green: url("/brand/icon-spark-accent.svg");
 
   --color-bg: var(--cream);
   --color-bg-subtle: var(--sand);
@@ -45,13 +48,13 @@
   --color-border: var(--sand);
   --color-border-strong: var(--slate);
 
-  --color-accent: var(--specialty-green);
-  --color-accent-hover: var(--kelp);
+  --color-accent: var(--hueston-spark);
+  --color-accent-hover: var(--spark-deep);
   --color-accent-subtle: var(--mint);
-  --color-on-accent: var(--ink);
-  --color-on-accent-hover: var(--cream);
+  --color-on-accent: var(--white);
+  --color-on-accent-hover: var(--white);
 
-  --color-success: var(--kelp);
+  --color-success: var(--metric-up);
   --color-danger: var(--clay);
 
   --font-sans: var(--font-geist-sans, "Geist"), ui-sans-serif, system-ui, sans-serif;
@@ -91,7 +94,7 @@
   --nav-muted: var(--mist);
   --nav-active: var(--button-bg);
   --nav-active-fg: var(--button-fg);
-  --nav-item-hover: var(--kelp);
+  --nav-item-hover: var(--navy-lift);
   --nav-min-width: 16rem;
   --nav-pad-x: var(--space-6);
 

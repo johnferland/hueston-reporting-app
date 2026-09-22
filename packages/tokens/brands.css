@@ -1,5 +1,5 @@
 /**
- * Lab/company accent only. The parent Specialty shell lives in
+ * Company accent only. The Hueston shell lives in
  * `brand.override.css`. Labs inherit that system until a lab palette is final —
  * then set `--color-accent` / `--color-accent-hover` here, not in pages.
  *

@@ -249,7 +249,7 @@ export default async function BrandDashboard({
             </form>
           </Panel>
         ) : (
-          <TextMuted>Lead entry is limited to Super Admins and this lab&apos;s manager.</TextMuted>
+          <TextMuted>Lead entry is limited to Super Admins and this company&apos;s manager.</TextMuted>
         )}
 
         {recentLeads.length ? (

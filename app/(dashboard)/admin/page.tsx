@@ -20,7 +20,7 @@ export default async function AdminPage({
     <Page>
       <PageHeader
         title="Admin"
-        description="Manage companies, property IDs, and who can see each lab."
+        description="Manage companies, property IDs, and who can see each company."
         actions={
           <div className="ds-row">
             <Button href="/api/admin/google-oauth/start">Connect Google</Button>
@@ -42,11 +42,11 @@ export default async function AdminPage({
           <h3 className="ds-heading-sm">Add person</h3>
           <form action={addPersonAction} className="ds-row">
             <Field label="Email">
-              <Input type="email" name="email" required placeholder="name@lab.com" />
+              <Input type="email" name="email" required placeholder="name@company.com" />
             </Field>
             <Field label="Role">
               <Select name="role" defaultValue="lab_manager">
-                <option value="lab_manager">Lab manager</option>
+                <option value="lab_manager">Company manager</option>
                 <option value="exec">Exec</option>
                 <option value="super_admin">Super admin</option>
               </Select>
@@ -77,7 +77,7 @@ export default async function AdminPage({
                 <form action={assignPersonAction} className="ds-row">
                   <input type="hidden" name="user_id" value={person.id} />
                   <Select name="role" defaultValue={person.role}>
-                    <option value="lab_manager">Lab manager</option>
+                    <option value="lab_manager">Company manager</option>
                     <option value="exec">Exec</option>
                     <option value="super_admin">Super admin</option>
                   </Select>
