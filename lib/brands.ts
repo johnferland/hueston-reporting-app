@@ -128,7 +128,7 @@ function normalizeBrandInput(input: BrandInput) {
 
 async function queryBrandRows(columns: string) {
   const supabase = getSupabaseAdmin();
-  return supabase.from("brands").select(columns).order("name");
+  return supabase.from("brands").select(columns as "*").order("name");
 }
 
 async function listBrandRows(): Promise<Brand[]> {
@@ -151,11 +151,11 @@ async function findBrand(filter: { id?: string; slug?: string }): Promise<Brand 
   const supabase = getSupabaseAdmin();
   let lastError: string | undefined;
   for (const columns of columnAttempts()) {
-    let query = supabase.from("brands").select(columns);
+    let query = supabase.from("brands").select(columns as "*");
     if (filter.id) query = query.eq("id", filter.id);
     if (filter.slug) query = query.eq("slug", filter.slug);
     const { data, error } = await query.maybeSingle();
-    if (!error) return data ? mapBrand(data as Record<string, unknown>) : null;
+    if (!error) return data ? mapBrand(data as unknown as Record<string, unknown>) : null;
     lastError = error.message;
     if (!missingColumn(error.message)) throw new Error(error.message);
   }
@@ -244,7 +244,7 @@ async function saveBrandRow(
 
   for (const options of attempts) {
     const payload = brandWritePayload(normalized, options);
-    const columns = options.sections ? BRAND_COLUMNS : BRAND_COLUMNS_NO_SECTIONS;
+    const columns = (options.sections ? BRAND_COLUMNS : BRAND_COLUMNS_NO_SECTIONS) as "*";
     const query =
       mode === "insert"
         ? supabase.from("brands").insert(payload).select(columns).single()
@@ -265,13 +265,13 @@ async function saveBrandRow(
 export async function createBrand(input: BrandInput): Promise<Brand> {
   const normalized = normalizeBrandInput(input);
   const data = await saveBrandRow("insert", null, normalized);
-  await upsertCredentials(data.id as string, normalized);
-  return mapBrand(data as Record<string, unknown>);
+  await upsertCredentials(String(data.id), normalized);
+  return mapBrand(data as unknown as Record<string, unknown>);
 }
 
 export async function updateBrand(brandId: string, input: BrandInput): Promise<Brand> {
   const normalized = normalizeBrandInput(input);
   const data = await saveBrandRow("update", brandId, normalized);
   await upsertCredentials(brandId, normalized);
-  return mapBrand(data as Record<string, unknown>);
+  return mapBrand(data as unknown as Record<string, unknown>);
 }
