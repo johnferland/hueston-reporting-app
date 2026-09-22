@@ -167,14 +167,14 @@ export async function getBrandPeriodMetrics(
   const today = utcTodayIso();
   const { data: latestSync } = await supabase
     .from("sync_logs")
-    .select("created_at")
+    .select("run_at")
     .eq("brand_id", brandId)
     .eq("status", "success")
-    .order("created_at", { ascending: false })
+    .order("run_at", { ascending: false })
     .limit(1)
     .maybeSingle();
   const syncedToday = Boolean(
-    latestSync?.created_at && easternDateFromTimestamp(String(latestSync.created_at)) === today,
+    latestSync?.run_at && easternDateFromTimestamp(String(latestSync.run_at)) === today,
   );
   const asOf = getSnapshotAsOf(period, syncedToday);
   const periodRange = _range;

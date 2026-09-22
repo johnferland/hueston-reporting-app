@@ -231,9 +231,8 @@ export async function syncGscForBrand(
         impressions: Math.round(Number(row.impressions ?? 0)),
         ctr: Number(row.ctr ?? 0),
         avg_position: row.position == null ? null : Number(row.position),
-        ...(keywords
-          ? { keywords_top3: keywords.keywordsTop3, total_keywords: keywords.totalKeywords }
-          : {}),
+        keywords_top3: keywords?.keywordsTop3 ?? 0,
+        total_keywords: keywords?.totalKeywords ?? 0,
       };
     })
     .filter((row) => row.date);
