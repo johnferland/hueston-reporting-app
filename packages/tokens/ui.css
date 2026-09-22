@@ -266,17 +266,42 @@
   width: 100%;
   min-width: 0;
 }
-.ds-company-actions {
+.ds-section-toggles {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
+  gap: var(--space-3);
+  grid-column: 1 / -1;
+}
+.ds-check-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+}
+.ds-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+.ds-check input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--color-accent);
+}
+.ds-company-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
   width: max-content;
   max-width: 100%;
-  gap: var(--space-3);
-  align-items: start;
+}
+.ds-company-actions:has(.ds-sync-now .ds-muted) {
+  margin-bottom: 3rem;
 }
 .ds-company-actions .ds-button {
-  width: 100%;
+  width: auto;
+  flex: 0 0 auto;
   min-width: var(--button-min-width);
   box-sizing: border-box;
 }
@@ -287,7 +312,15 @@
   max-width: 100%;
 }
 .ds-company-actions .ds-sync-now {
-  width: auto;
+  position: relative;
+}
+.ds-company-actions .ds-sync-now .ds-muted {
+  position: absolute;
+  left: 0;
+  top: calc(100% + var(--space-2));
+  width: max-content;
+  max-width: 28rem;
+  margin: 0;
 }
 .ds-company-webhook {
   margin-top: var(--space-6);

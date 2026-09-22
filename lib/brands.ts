@@ -1,5 +1,9 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { generateWebLeadsWebhookSecret } from "@/lib/web-leads";
+import {
+  parseVisibleSections,
+  type DashboardSections,
+} from "@/lib/dashboard-sections";
 
 export type Brand = {
   id: string;
@@ -10,6 +14,7 @@ export type Brand = {
   accent_color: string;
   logo_url: string | null;
   is_active?: boolean;
+  visible_sections: DashboardSections;
 };
 
 export type BrandCredentials = {
@@ -29,6 +34,7 @@ export type BrandInput = {
   domain: string;
   accent_color?: string;
   logo_url?: string | null;
+  visible_sections: DashboardSections;
 } & BrandCredentials;
 
 export function slugify(value: string): string {
@@ -44,8 +50,20 @@ function missingColumn(message: string | undefined) {
   return Boolean(message && /does not exist|schema cache/i.test(message));
 }
 
-const BRAND_COLUMNS = "id, slug, name, nav_abbreviation, domain, accent_color, logo_url";
+const BRAND_COLUMNS = "id, slug, name, nav_abbreviation, domain, accent_color, logo_url, visible_sections";
+const BRAND_COLUMNS_NO_SECTIONS = "id, slug, name, nav_abbreviation, domain, accent_color, logo_url";
 const BRAND_COLUMNS_BASIC = "id, slug, name, domain, accent_color, logo_url";
+
+function columnAttempts() {
+  return [
+    `${BRAND_COLUMNS}, is_active`,
+    BRAND_COLUMNS,
+    `${BRAND_COLUMNS_NO_SECTIONS}, is_active`,
+    BRAND_COLUMNS_NO_SECTIONS,
+    `${BRAND_COLUMNS_BASIC}, is_active`,
+    BRAND_COLUMNS_BASIC,
+  ];
+}
 
 export function brandNavLabel(brand: Pick<Brand, "name" | "nav_abbreviation">): string {
   const abbreviation = brand.nav_abbreviation?.trim();
@@ -62,6 +80,7 @@ function mapBrand(row: Record<string, unknown>): Brand {
     accent_color: String(row.accent_color),
     logo_url: row.logo_url == null ? null : String(row.logo_url),
     is_active: row.is_active === undefined ? undefined : Boolean(row.is_active),
+    visible_sections: parseVisibleSections(row.visible_sections),
   };
 }
 
@@ -103,6 +122,7 @@ function normalizeBrandInput(input: BrandInput) {
     gsc_site_url: emptyToNull(input.gsc_site_url),
     google_ads_customer_id: emptyToNull(input.google_ads_customer_id),
     meta_ad_account_id: normalizeMetaAdAccountId(input.meta_ad_account_id),
+    visible_sections: input.visible_sections,
   };
 }
 
@@ -112,7 +132,7 @@ async function queryBrandRows(columns: string) {
 }
 
 async function listBrandRows(): Promise<Brand[]> {
-  const attempts = [`${BRAND_COLUMNS}, is_active`, `${BRAND_COLUMNS_BASIC}, is_active`, BRAND_COLUMNS, BRAND_COLUMNS_BASIC];
+  const attempts = columnAttempts();
   let lastError: string | undefined;
   for (const columns of attempts) {
     const { data, error } = await queryBrandRows(columns);
@@ -127,14 +147,27 @@ export async function listActiveBrands(): Promise<Brand[]> {
   return (await listBrandRows()).filter((brand) => brand.is_active !== false);
 }
 
-export async function getBrandById(brandId: string): Promise<Brand | null> {
+async function findBrand(filter: { id?: string; slug?: string }): Promise<Brand | null> {
   const supabase = getSupabaseAdmin();
-  const full = await supabase.from("brands").select(BRAND_COLUMNS).eq("id", brandId).maybeSingle();
-  if (!full.error) return full.data ? mapBrand(full.data as Record<string, unknown>) : null;
-  if (!missingColumn(full.error.message)) throw new Error(full.error.message);
-  const basic = await supabase.from("brands").select(BRAND_COLUMNS_BASIC).eq("id", brandId).maybeSingle();
-  if (basic.error) throw new Error(basic.error.message);
-  return basic.data ? mapBrand(basic.data as Record<string, unknown>) : null;
+  let lastError: string | undefined;
+  for (const columns of columnAttempts()) {
+    let query = supabase.from("brands").select(columns);
+    if (filter.id) query = query.eq("id", filter.id);
+    if (filter.slug) query = query.eq("slug", filter.slug);
+    const { data, error } = await query.maybeSingle();
+    if (!error) return data ? mapBrand(data as Record<string, unknown>) : null;
+    lastError = error.message;
+    if (!missingColumn(error.message)) throw new Error(error.message);
+  }
+  throw new Error(lastError ?? "Could not load brand.");
+}
+
+export async function getBrandById(brandId: string): Promise<Brand | null> {
+  return findBrand({ id: brandId });
+}
+
+export async function getBrandBySlug(slug: string): Promise<Brand | null> {
+  return findBrand({ slug });
 }
 
 export async function listBrandsWithCredentials(): Promise<BrandWithCredentials[]> {
@@ -182,65 +215,63 @@ async function upsertCredentials(brandId: string, input: ReturnType<typeof norma
   if (error) throw new Error(error.message);
 }
 
-function brandWritePayload(normalized: ReturnType<typeof normalizeBrandInput>, includeAbbreviation: boolean) {
+function brandWritePayload(
+  normalized: ReturnType<typeof normalizeBrandInput>,
+  options: { abbreviation: boolean; sections: boolean },
+) {
   return {
     name: normalized.name,
     slug: normalized.slug,
     domain: normalized.domain,
     accent_color: normalized.accent_color,
     logo_url: normalized.logo_url,
-    ...(includeAbbreviation ? { nav_abbreviation: normalized.nav_abbreviation } : {}),
+    ...(options.abbreviation ? { nav_abbreviation: normalized.nav_abbreviation } : {}),
+    ...(options.sections ? { visible_sections: normalized.visible_sections } : {}),
   };
+}
+
+async function saveBrandRow(
+  mode: "insert" | "update",
+  brandId: string | null,
+  normalized: ReturnType<typeof normalizeBrandInput>,
+) {
+  const supabase = getSupabaseAdmin();
+  const attempts = [
+    { abbreviation: true, sections: true },
+    { abbreviation: false, sections: true },
+  ];
+  let lastError: { message: string; code?: string } | undefined;
+
+  for (const options of attempts) {
+    const payload = brandWritePayload(normalized, options);
+    const columns = options.sections ? BRAND_COLUMNS : BRAND_COLUMNS_NO_SECTIONS;
+    const query =
+      mode === "insert"
+        ? supabase.from("brands").insert(payload).select(columns).single()
+        : supabase.from("brands").update(payload).eq("id", brandId as string).select(columns).single();
+    const result = await query;
+    if (!result.error) return result.data;
+    lastError = result.error;
+    if (!missingColumn(result.error.message)) break;
+    if (result.error.message.includes("visible_sections")) {
+      throw new Error("Run supabase/add-visible-sections.sql in the Supabase SQL editor, then save again.");
+    }
+  }
+
+  if (lastError?.code === "23505") throw new Error(`A brand with slug "${normalized.slug}" already exists.`);
+  throw new Error(lastError?.message ?? "Could not save brand.");
 }
 
 export async function createBrand(input: BrandInput): Promise<Brand> {
   const normalized = normalizeBrandInput(input);
-  const supabase = getSupabaseAdmin();
-
-  const insert = await supabase
-    .from("brands")
-    .insert(brandWritePayload(normalized, true))
-    .select(BRAND_COLUMNS)
-    .single();
-  const result =
-    insert.error && missingColumn(insert.error.message)
-      ? await supabase.from("brands").insert(brandWritePayload(normalized, false)).select(BRAND_COLUMNS_BASIC).single()
-      : insert;
-
-  if (result.error) {
-    if (result.error.code === "23505") throw new Error(`A brand with slug "${normalized.slug}" already exists.`);
-    throw new Error(result.error.message);
-  }
-
-  await upsertCredentials(result.data.id as string, normalized);
-  return mapBrand(result.data as Record<string, unknown>);
+  const data = await saveBrandRow("insert", null, normalized);
+  await upsertCredentials(data.id as string, normalized);
+  return mapBrand(data as Record<string, unknown>);
 }
 
 export async function updateBrand(brandId: string, input: BrandInput): Promise<Brand> {
   const normalized = normalizeBrandInput(input);
-  const supabase = getSupabaseAdmin();
-
-  const update = await supabase
-    .from("brands")
-    .update(brandWritePayload(normalized, true))
-    .eq("id", brandId)
-    .select(BRAND_COLUMNS)
-    .single();
-  const result =
-    update.error && missingColumn(update.error.message)
-      ? await supabase
-          .from("brands")
-          .update(brandWritePayload(normalized, false))
-          .eq("id", brandId)
-          .select(BRAND_COLUMNS_BASIC)
-          .single()
-      : update;
-
-  if (result.error) {
-    if (result.error.code === "23505") throw new Error(`A brand with slug "${normalized.slug}" already exists.`);
-    throw new Error(result.error.message);
-  }
-
+  const data = await saveBrandRow("update", brandId, normalized);
   await upsertCredentials(brandId, normalized);
-  return mapBrand(result.data as Record<string, unknown>);
+  return mapBrand(data as Record<string, unknown>);
 }

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { requireSuperAdmin } from "@/lib/auth";
 import { createBrand, updateBrand, type Brand } from "@/lib/brands";
+import { sectionsFromForm } from "@/lib/dashboard-sections";
 import { rotateWebLeadsWebhookSecret } from "@/lib/web-leads";
 
 function formValue(formData: FormData, key: string): string {
@@ -21,6 +22,7 @@ function inputFromForm(formData: FormData) {
     gsc_site_url: formValue(formData, "gsc_site_url"),
     google_ads_customer_id: formValue(formData, "google_ads_customer_id"),
     meta_ad_account_id: formValue(formData, "meta_ad_account_id"),
+    visible_sections: sectionsFromForm(formData),
   };
 }
 

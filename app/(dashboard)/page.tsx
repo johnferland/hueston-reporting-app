@@ -52,10 +52,18 @@ export default async function DashboardHome({
                 <h2 className="ds-heading-sm">{brand.name}</h2>
                 <TextMuted>{brand.domain}</TextMuted>
               </div>
-              <MetricCard label="Total leads" hint="totalLeads" metric={metrics.totalLeads} />
-              <MetricCard label="Organic traffic" hint="organicTraffic" metric={metrics.organicTraffic} />
-              <MetricCard label="Top 3 keywords" hint="keywordsTop3" metric={metrics.keywordsTop3} />
-              <MetricCard label="Cost per conversion" hint="adsCostPerConversion" metric={metrics.adsCostPerConversion} digits={2} prefix="$" lowerIsBetter />
+              {brand.visible_sections.leads ? (
+                <MetricCard label="Total leads" hint="totalLeads" metric={metrics.totalLeads} />
+              ) : null}
+              {brand.visible_sections.search ? (
+                <>
+                  <MetricCard label="Organic traffic" hint="organicTraffic" metric={metrics.organicTraffic} />
+                  <MetricCard label="Top 3 keywords" hint="keywordsTop3" metric={metrics.keywordsTop3} />
+                </>
+              ) : null}
+              {brand.visible_sections.google_ads || brand.visible_sections.meta_ads ? (
+                <MetricCard label="Cost per conversion" hint="adsCostPerConversion" metric={metrics.adsCostPerConversion} digits={2} prefix="$" lowerIsBetter />
+              ) : null}
             </div>
           </Card>
         ))}

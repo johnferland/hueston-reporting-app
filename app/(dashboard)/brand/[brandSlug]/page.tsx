@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { requireAppUser, canAccessBrand, canLogWeeklyLeads } from "@/lib/auth";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { getBrandBySlug } from "@/lib/brands";
 import { getBrandPeriodMetrics, listRecentLeads } from "@/lib/metrics";
 import {
   listWebLeadsPage,
@@ -74,12 +74,7 @@ export default async function BrandDashboard({
     isIsoDate(leadsToParam) ? leadsToParam : defaultLeadsRange.end,
   );
 
-  const supabase = getSupabaseAdmin();
-  const { data: brand } = await supabase
-    .from("brands")
-    .select("id, name, slug, domain")
-    .eq("slug", brandSlug)
-    .maybeSingle();
+  const brand = await getBrandBySlug(brandSlug);
 
   if (!brand) {
     return (
@@ -89,7 +84,7 @@ export default async function BrandDashboard({
     );
   }
 
-  if (!canAccessBrand(user, brand.id as string)) {
+  if (!canAccessBrand(user, brand.id)) {
     return (
       <Page>
         <PageHeader title="No access" description="You don't have access to this brand." />
@@ -97,26 +92,29 @@ export default async function BrandDashboard({
     );
   }
 
+  const sections = brand.visible_sections;
   const [metrics, recentLeads, webLeads] = await Promise.all([
-    getBrandPeriodMetrics(brand.id as string, range, period),
-    listRecentLeads(brand.id as string),
-    listWebLeadsPage({
-      brandId: brand.id as string,
-      start: leadsRange.start,
-      end: leadsRange.end,
-      page: parseWebLeadPage(leadsPageParam),
-      perPage: leadsPer,
-    }),
+    getBrandPeriodMetrics(brand.id, range, period),
+    sections.offline_leads ? listRecentLeads(brand.id) : Promise.resolve([]),
+    sections.web_leads
+      ? listWebLeadsPage({
+          brandId: brand.id,
+          start: leadsRange.start,
+          end: leadsRange.end,
+          page: parseWebLeadPage(leadsPageParam),
+          perPage: leadsPer,
+        })
+      : Promise.resolve(null),
   ]);
-  const canEnterLeads = canLogWeeklyLeads(user, brand.id as string);
+  const canEnterLeads = canLogWeeklyLeads(user, brand.id);
   const weekStart = currentWeekStart();
   const thisWeek = recentLeads.find((row) => row.week_start_date === weekStart);
 
   return (
     <Page brand={brandSlug}>
       <PageHeader
-        title={brand.name as string}
-        description={brand.domain as string}
+        title={brand.name}
+        description={brand.domain}
         actions={
           <PeriodToggle
             current={period}
@@ -137,16 +135,16 @@ export default async function BrandDashboard({
       {saved ? <Alert tone="ok">{saved}</Alert> : null}
       {error ? <Alert tone="err">{error}</Alert> : null}
 
-      <Section title="Leads">
+      {sections.leads ? <Section title="Leads">
         <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
           <MetricCard label="Total leads" hint="totalLeads" metric={metrics.totalLeads} />
           <MetricCard label="Web leads" hint="webLeads" metric={metrics.webLeads} />
           <MetricCard label="Offline leads" hint="offlineLeads" metric={metrics.offlineLeads} />
         </div>
-      </Section>
+      </Section> : null}
 
-      <Section title="Search">
+      {sections.search ? <Section title="Search">
         <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
           <MetricCard label="Keywords top 3" hint="keywordsTop3" metric={metrics.keywordsTop3} />
@@ -159,9 +157,9 @@ export default async function BrandDashboard({
           <MetricCard label="CTR" hint="searchCtr" metric={metrics.ctr} digits={1} suffix="%" />
           <MetricCard label="Avg. position" hint="avgPosition" metric={metrics.avgPosition} digits={1} lowerIsBetter />
         </div>
-      </Section>
+      </Section> : null}
 
-      <Section title="Google Ads">
+      {sections.google_ads ? <Section title="Google Ads">
         <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
           <MetricCard label="Ad spend" hint="googleSpend" metric={metrics.googleSpend} digits={2} prefix="$" lowerIsBetter />
@@ -171,9 +169,9 @@ export default async function BrandDashboard({
           <MetricCard label="Conversions" hint="googleConversions" metric={metrics.googleConversions} />
           <MetricCard label="Cost per conversion" hint="googleCostPerConversion" metric={metrics.googleCostPerConversion} digits={2} prefix="$" lowerIsBetter />
         </div>
-      </Section>
+      </Section> : null}
 
-      <Section title="Meta Ads">
+      {sections.meta_ads ? <Section title="Meta Ads">
         <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
           <MetricCard label="Ad spend" hint="metaSpend" metric={metrics.metaSpend} digits={2} prefix="$" lowerIsBetter />
@@ -184,9 +182,9 @@ export default async function BrandDashboard({
           <MetricCard label="CTR" hint="metaCtr" metric={metrics.metaCtr} digits={2} suffix="%" />
           <MetricCard label="Cost per lead" hint="metaCostPerLead" metric={metrics.metaCostPerLead} digits={2} prefix="$" lowerIsBetter />
         </div>
-      </Section>
+      </Section> : null}
 
-      <Section title="AI visibility">
+      {sections.ai ? <Section title="AI visibility">
         <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
           <MetricCard label="Total AI referral traffic" hint="aiTotal" metric={metrics.aiTotal} />
@@ -199,14 +197,14 @@ export default async function BrandDashboard({
             />
           ))}
         </div>
-      </Section>
+      </Section> : null}
 
-      <Section title="Offline leads">
+      {sections.offline_leads ? <Section title="Offline leads">
         {canEnterLeads ? (
           <Panel className="ds-stack">
             <h3 className="ds-heading-sm">Log this week&apos;s offline leads</h3>
             <form action={saveWeeklyLeadsAction} className="ds-stack">
-              <input type="hidden" name="brand_id" value={brand.id as string} />
+              <input type="hidden" name="brand_id" value={brand.id} />
               <input type="hidden" name="brand_slug" value={brandSlug} />
               <input type="hidden" name="period" value={period} />
               <div className="ds-form-grid">
@@ -275,18 +273,20 @@ export default async function BrandDashboard({
             })}
           </Table>
         ) : null}
-      </Section>
+      </Section> : null}
 
-      <WebLeadsSection
-        brandSlug={brandSlug}
-        period={period}
-        start={leadsRange.start}
-        end={leadsRange.end}
-        perPage={leadsPer}
-        page={webLeads.page}
-        rows={webLeads.rows}
-        total={webLeads.total}
-      />
+      {webLeads ? (
+        <WebLeadsSection
+          brandSlug={brandSlug}
+          period={period}
+          start={leadsRange.start}
+          end={leadsRange.end}
+          perPage={leadsPer}
+          page={webLeads.page}
+          rows={webLeads.rows}
+          total={webLeads.total}
+        />
+      ) : null}
     </Page>
   );
 }

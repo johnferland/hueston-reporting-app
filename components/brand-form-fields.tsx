@@ -1,4 +1,5 @@
 import { Field, Input } from "@/components/ui";
+import { DASHBOARD_SECTIONS, type DashboardSections } from "@/lib/dashboard-sections";
 
 export function BrandFormFields({
   brand,
@@ -14,6 +15,7 @@ export function BrandFormFields({
     gsc_site_url: string | null;
     google_ads_customer_id: string | null;
     meta_ad_account_id: string | null;
+    visible_sections?: DashboardSections;
   };
 }) {
   return (
@@ -52,6 +54,23 @@ export function BrandFormFields({
       <Field label="Meta ad account ID">
         <Input name="meta_ad_account_id" defaultValue={brand?.meta_ad_account_id ?? ""} placeholder="123456789" />
       </Field>
+      <div className="ds-section-toggles">
+        <h3 className="ds-heading-sm">Sections</h3>
+        <p className="ds-muted">Unchecked sections stay off this company&apos;s dashboard.</p>
+        <div className="ds-check-list">
+          {DASHBOARD_SECTIONS.map((section) => (
+            <label key={section.key} className="ds-check">
+              <input
+                type="checkbox"
+                name={`section_${section.key}`}
+                value="1"
+                defaultChecked={brand?.visible_sections?.[section.key] !== false}
+              />
+              {section.label}
+            </label>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

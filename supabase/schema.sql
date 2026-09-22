@@ -12,6 +12,15 @@ create table brands (
   accent_color text not null,
   logo_url text,
   is_active boolean not null default true,
+  visible_sections jsonb not null default '{
+    "leads": true,
+    "search": true,
+    "google_ads": true,
+    "meta_ads": true,
+    "ai": true,
+    "offline_leads": true,
+    "web_leads": true
+  }'::jsonb,
   created_at timestamptz not null default now()
 );
 
