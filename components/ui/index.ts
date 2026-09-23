@@ -8,3 +8,17 @@ export { Nav, NavBrand, NavLink, NavMenu, NavMenuItem, NavRight, NavSection, She
 export { SegmentedControl, SegmentedItem } from "./segmented-control";
 export { MetricCard, EmptyCard } from "./metric-card";
 export { ReportMarkdown } from "./markdown";
+export {
+  ReportPage,
+  ReportTop,
+  ReportBand,
+  ReportWin,
+  ReportGlance,
+  ReportGlanceCard,
+  ReportChannels,
+  ReportChannel,
+  ReportTile,
+  ReportActions,
+  formatMetric,
+  priorNote,
+} from "./report";
