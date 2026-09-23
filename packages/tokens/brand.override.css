@@ -95,7 +95,7 @@
   --nav-active: var(--button-bg);
   --nav-active-fg: var(--button-fg);
   --nav-item-hover: var(--navy-lift);
-  --nav-min-width: 16rem;
+  --nav-min-width: 22rem;
   --nav-pad-x: var(--space-6);
 
   --table-bg: var(--mist);
