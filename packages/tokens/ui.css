@@ -400,8 +400,9 @@
   align-items: stretch;
   gap: var(--space-2);
   box-sizing: border-box;
-  width: max-content;
+  width: var(--nav-min-width, var(--nav-width));
   min-width: var(--nav-min-width, var(--nav-width));
+  max-width: var(--nav-min-width, var(--nav-width));
   height: 100vh;
   padding: var(--space-6) var(--nav-pad-x) var(--space-5);
   background: var(--nav-bg);
@@ -410,11 +411,17 @@
   top: 0;
   z-index: 20;
   color: var(--nav-fg);
+  overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 .ds-nav .ds-button,
 .ds-nav .ds-menu-trigger {
-  width: auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: var(--button-height);
+  flex-shrink: 0;
   align-self: stretch;
   box-sizing: border-box;
   justify-content: flex-start;
@@ -432,6 +439,7 @@
   position: relative;
   z-index: 1;
   align-self: stretch;
+  flex-shrink: 0;
 }
 .ds-nav-brand {
   display: flex;
@@ -477,7 +485,9 @@
   align-items: stretch;
 }
 .ds-nav-section .ds-button {
-  width: auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   align-self: stretch;
   box-sizing: border-box;
 }
@@ -507,13 +517,20 @@
   position: relative;
   display: grid;
   gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 .ds-menu-trigger {
+  display: flex;
   cursor: pointer;
   list-style: none;
 }
 .ds-menu-trigger::-webkit-details-marker,
-.ds-menu-trigger::marker { display: none; }
+.ds-menu-trigger::marker {
+  content: "";
+  display: none;
+}
 .ds-menu-list {
   display: grid;
   gap: var(--space-2);
@@ -530,6 +547,8 @@
   }
   .ds-nav {
     width: 100%;
+    min-width: 0;
+    max-width: none;
     height: auto;
     max-height: none;
     flex-direction: row;
@@ -553,6 +572,7 @@
   .ds-nav .ds-button,
   .ds-nav .ds-menu-trigger {
     width: auto;
+    max-width: none;
   }
 }
 
