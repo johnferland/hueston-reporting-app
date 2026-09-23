@@ -148,7 +148,6 @@ export default async function BrandDashboard({
         <TextMuted>{periodLabel}</TextMuted>
         <div className="ds-grid">
           <MetricCard label="Keywords top 3" hint="keywordsTop3" metric={metrics.keywordsTop3} />
-          <MetricCard label="Organic reach" hint="organicReach" metric={metrics.organicReach} />
           <MetricCard label="Organic traffic" hint="organicTraffic" metric={metrics.organicTraffic} />
           <MetricCard label="New users" hint="newUsers" metric={metrics.newUsers} />
           <MetricCard label="Total keywords" hint="totalKeywords" metric={metrics.totalKeywords} />

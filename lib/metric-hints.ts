@@ -3,7 +3,6 @@ export const METRIC_HINTS = {
   webLeads: "Website form fills this period — how well search and ads are turning visits into inquiries.",
   offlineLeads: "Phone, email, referral, trade-show, and social inquiries logged this period — demand that never hits the website.",
   keywordsTop3: "Queries ranking in positions 1–3 right now — the terms most likely to win the click.",
-  organicReach: "Google Search impressions this period — how often the company appeared in unpaid results.",
   organicTraffic: "Organic sessions this period — people who arrived from unpaid search.",
   newUsers: "First-time visitors this period — whether search is bringing in new customers.",
   totalKeywords: "Distinct queries the site ranks for today — the size of the organic footprint.",

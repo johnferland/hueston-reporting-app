@@ -19,7 +19,6 @@ export type BrandPeriodMetrics = {
   newUsers: MetricValue;
   clicks: MetricValue;
   impressions: MetricValue;
-  organicReach: MetricValue;
   ctr: MetricValue;
   avgPosition: MetricValue;
   keywordsTop3: MetricValue;
@@ -400,7 +399,6 @@ export async function getBrandPeriodMetrics(
     ),
     clicks: metric(currentSeo.clicks, previousSeo.clicks),
     impressions: metric(currentSeo.impressions, previousSeo.impressions),
-    organicReach: metric(currentSeo.impressions, previousSeo.impressions),
     ctr: metric(currentSeo.ctr * 100, previousSeo.ctr * 100),
     avgPosition: metric(currentSeoSnapshot.avgPosition, previousSeoSnapshot.avgPosition),
     keywordsTop3: metric(currentSeoSnapshot.keywordsTop3, previousSeoSnapshot.keywordsTop3),
