@@ -414,7 +414,8 @@
 }
 .ds-nav .ds-button,
 .ds-nav .ds-menu-trigger {
-  width: 100%;
+  width: auto;
+  align-self: stretch;
   box-sizing: border-box;
   justify-content: flex-start;
 }
@@ -476,7 +477,8 @@
   align-items: stretch;
 }
 .ds-nav-section .ds-button {
-  width: 100%;
+  width: auto;
+  align-self: stretch;
   box-sizing: border-box;
 }
 .ds-nav-icon,
