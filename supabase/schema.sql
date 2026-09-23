@@ -163,6 +163,17 @@ create table leaderboard_snapshots (
   unique (period_start, period_end, brand_id)
 );
 
+create table monthly_reports (
+  id uuid primary key default gen_random_uuid(),
+  brand_id uuid not null references brands(id) on delete cascade,
+  month date not null,
+  slug text not null unique,
+  win_of_month text not null,
+  work_done text not null,
+  created_at timestamptz not null default now(),
+  unique (brand_id, month)
+);
+
 create table sync_logs (
   id uuid primary key default gen_random_uuid(),
   brand_id uuid references brands(id),
@@ -184,7 +195,7 @@ begin
   for t in select unnest(array[
     'brands', 'users', 'shared_credentials', 'brand_credentials', 'ga4_metrics',
     'gsc_metrics', 'ads_metrics', 'manual_leads', 'web_leads', 'manual_deals', 'social_sqls',
-    'leaderboard_snapshots', 'sync_logs'
+    'leaderboard_snapshots', 'sync_logs', 'monthly_reports'
   ])
   loop
     execute format('alter table %I enable row level security', t);

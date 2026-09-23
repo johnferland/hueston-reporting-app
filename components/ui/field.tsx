@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, SelectHTMLAttributes, ReactNode } from "react";
+import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 export function Field({
@@ -24,4 +24,8 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
 
 export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
   return <select {...props} className={cn("ds-select", props.className)} />;
+}
+
+export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea {...props} className={cn("ds-input ds-textarea", props.className)} />;
 }

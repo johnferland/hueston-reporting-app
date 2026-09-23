@@ -1,5 +1,5 @@
 export { Button, buttonClassName } from "./button";
-export { Field, Input, Select } from "./field";
+export { Field, Input, Select, Textarea } from "./field";
 export { Card, Panel } from "./card";
 export { Page, PageHeader, Section, Alert, TextMuted } from "./page";
 export { Table } from "./table";

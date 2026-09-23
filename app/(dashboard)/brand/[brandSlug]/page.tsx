@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { requireAppUser, canAccessBrand, canLogWeeklyLeads } from "@/lib/auth";
 import { getBrandBySlug } from "@/lib/brands";
 import { getBrandPeriodMetrics, listRecentLeads } from "@/lib/metrics";
+import { latestReportForBrand, reportPath } from "@/lib/monthly-reports";
 import {
   listWebLeadsPage,
   parseWebLeadPage,
@@ -107,6 +108,7 @@ export default async function BrandDashboard({
       : Promise.resolve(null),
   ]);
   const canEnterLeads = canLogWeeklyLeads(user, brand.id);
+  const latestReport = await latestReportForBrand(brand.id);
   const weekStart = currentWeekStart();
   const thisWeek = recentLeads.find((row) => row.week_start_date === weekStart);
 
@@ -116,19 +118,26 @@ export default async function BrandDashboard({
         title={brand.name}
         description={brand.domain}
         actions={
-          <PeriodToggle
-            current={period}
-            basePath={`/brand/${brandSlug}`}
-            extraParams={
-              leadsFromParam || leadsToParam || leadsPerParam
-                ? {
-                    leads_from: leadsRange.start,
-                    leads_to: leadsRange.end,
-                    leads_per: String(leadsPer),
-                  }
-                : undefined
-            }
-          />
+          <div className="ds-row">
+            {latestReport ? (
+              <Button href={reportPath(latestReport.slug)} variant="secondary">
+                Monthly Report
+              </Button>
+            ) : null}
+            <PeriodToggle
+              current={period}
+              basePath={`/brand/${brandSlug}`}
+              extraParams={
+                leadsFromParam || leadsToParam || leadsPerParam
+                  ? {
+                      leads_from: leadsRange.start,
+                      leads_to: leadsRange.end,
+                      leads_per: String(leadsPer),
+                    }
+                  : undefined
+              }
+            />
+          </div>
         }
       />
 

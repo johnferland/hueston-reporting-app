@@ -329,6 +329,7 @@ const BRAND_CHILD_TABLES = [
   "social_sqls",
   "leaderboard_snapshots",
   "sync_logs",
+  "monthly_reports",
 ];
 
 export async function deleteBrand(brandId: string): Promise<string> {

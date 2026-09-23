@@ -1,8 +1,10 @@
 import { BrandFormFields } from "@/components/brand-form-fields";
 import { ConfirmForm } from "@/components/confirm-form";
 import { SyncNowButton } from "@/components/sync-now-button";
-import { Button, Field, Input, TextMuted } from "@/components/ui";
+import { Button, Field, Input, Textarea, TextMuted } from "@/components/ui";
 import type { BrandWithCredentials } from "@/lib/brands";
+import { previousMonthInput, reportPath, type MonthlyReport } from "@/lib/monthly-reports";
+import { generateMonthlyReportAction } from "./reports/actions";
 import {
   archiveBrandAction,
   deleteBrandAction,
@@ -24,11 +26,13 @@ export function CompanyPanel({
   returnTo,
   defaultOpen = false,
   archived = false,
+  reports = [],
 }: {
   brand: BrandWithCredentials;
   returnTo: "/admin" | "/admin/archived";
   defaultOpen?: boolean;
   archived?: boolean;
+  reports?: MonthlyReport[];
 }) {
   const deleteMessage = `Delete ${brand.name} permanently? This removes the company and all of its metrics, leads, and credentials. Assigned people are unlinked. This cannot be undone.`;
 
@@ -73,6 +77,37 @@ export function CompanyPanel({
             <input type="hidden" name="return_to" value={returnTo} />
             <Button variant="secondary">Generate / rotate secret</Button>
           </form>
+        </div>
+        <div className="ds-stack ds-company-webhook">
+          <h3 className="ds-heading-sm">Monthly report</h3>
+          <TextMuted>
+            Write the win and the work from last month, then generate. The report uses this company&apos;s live sections and opens from their dashboard.
+          </TextMuted>
+          <form action={generateMonthlyReportAction} className="ds-stack">
+            <input type="hidden" name="brand_id" value={brand.id} />
+            <input type="hidden" name="return_to" value={returnTo} />
+            <Field label="Month">
+              <Input name="month" type="month" required defaultValue={previousMonthInput()} />
+            </Field>
+            <Field label="Win of the month">
+              <Textarea name="win_of_month" required placeholder="The result worth leading with." />
+            </Field>
+            <Field label="Work done last month">
+              <Textarea name="work_done" required className="ds-textarea-lg" placeholder="What the team did. This is page 2 of the report." />
+            </Field>
+            <div className="ds-company-actions">
+              <Button>Generate monthly report</Button>
+            </div>
+          </form>
+          {reports.length ? (
+            <div className="ds-stack">
+              {reports.map((report) => (
+                <Button key={report.id} href={reportPath(report.slug)} variant="secondary">
+                  {report.label}
+                </Button>
+              ))}
+            </div>
+          ) : null}
         </div>
         <TextMuted>
           {archived

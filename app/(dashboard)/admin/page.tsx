@@ -1,5 +1,6 @@
 import { requireSuperAdmin } from "@/lib/auth";
 import { listBrandsWithCredentials, type Brand } from "@/lib/brands";
+import { listMonthlyReports } from "@/lib/monthly-reports";
 import { listManagedUsers } from "@/lib/users";
 import { BrandFormFields } from "@/components/brand-form-fields";
 import { SyncNowButton } from "@/components/sync-now-button";
@@ -19,7 +20,11 @@ export default async function AdminPage({
 }) {
   await requireSuperAdmin();
   const { saved, error, open } = await searchParams;
-  const [brands, people] = await Promise.all([listBrandsWithCredentials(), listManagedUsers()]);
+  const [brands, people, reports] = await Promise.all([
+    listBrandsWithCredentials(),
+    listManagedUsers(),
+    listMonthlyReports(),
+  ]);
   const activeBrands = brands.filter((brand) => brand.is_active !== false);
 
   return (
@@ -120,7 +125,13 @@ export default async function AdminPage({
           </Panel>
 
           {activeBrands.map((brand) => (
-            <CompanyPanel key={brand.id} brand={brand} returnTo="/admin" defaultOpen={open === brand.id} />
+            <CompanyPanel
+              key={brand.id}
+              brand={brand}
+              returnTo="/admin"
+              defaultOpen={open === brand.id}
+              reports={reports.filter((report) => report.brand_id === brand.id)}
+            />
           ))}
         </div>
       </Section>

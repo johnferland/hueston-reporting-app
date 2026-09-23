@@ -1,5 +1,6 @@
 import { requireSuperAdmin } from "@/lib/auth";
 import { listBrandsWithCredentials } from "@/lib/brands";
+import { listMonthlyReports } from "@/lib/monthly-reports";
 import { Alert, Page, PageHeader, Section, TextMuted } from "@/components/ui";
 import { CompanyPanel } from "../company-panel";
 
@@ -10,7 +11,7 @@ export default async function ArchivedClientsPage({
 }) {
   await requireSuperAdmin();
   const { saved, error, open } = await searchParams;
-  const brands = await listBrandsWithCredentials();
+  const [brands, reports] = await Promise.all([listBrandsWithCredentials(), listMonthlyReports()]);
   const archived = brands.filter((brand) => brand.is_active === false);
 
   return (
@@ -33,6 +34,7 @@ export default async function ArchivedClientsPage({
                 returnTo="/admin/archived"
                 archived
                 defaultOpen={open === brand.id}
+                reports={reports.filter((report) => report.brand_id === brand.id)}
               />
             ))}
           </div>

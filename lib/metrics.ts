@@ -161,6 +161,7 @@ export async function getBrandPeriodMetrics(
   brandId: string,
   _range: DateRange,
   period: PeriodKey = "week",
+  fixed?: { previous: DateRange; asOf: { current: string; previous: string } },
 ): Promise<BrandPeriodMetrics> {
   const supabase = getSupabaseAdmin();
   const today = utcTodayIso();
@@ -175,9 +176,9 @@ export async function getBrandPeriodMetrics(
   const syncedToday = Boolean(
     latestSync?.run_at && easternDateFromTimestamp(String(latestSync.run_at)) === today,
   );
-  const asOf = getSnapshotAsOf(period, syncedToday);
+  const asOf = fixed?.asOf ?? getSnapshotAsOf(period, syncedToday);
   const periodRange = _range;
-  const previousRange = getPreviousPeriodRange(period);
+  const previousRange = fixed?.previous ?? getPreviousPeriodRange(period);
   const to = asOf.current;
   const rowLimit = 5000;
 

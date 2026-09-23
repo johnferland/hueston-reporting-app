@@ -258,6 +258,12 @@
   gap: var(--space-1);
   font-size: var(--text-sm);
 }
+.ds-field .ds-input,
+.ds-field .ds-select,
+.ds-field .ds-textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
 .ds-input,
 .ds-select {
   height: var(--input-height);
@@ -267,6 +273,21 @@
   background: var(--input-bg);
   color: var(--color-text);
   font: inherit;
+}
+.ds-textarea {
+  height: auto;
+  min-height: calc(var(--space-12) * 2);
+  padding: var(--space-3);
+  line-height: var(--leading-normal);
+  resize: vertical;
+}
+.ds-textarea-lg {
+  min-height: calc(var(--space-12) * 4);
+}
+.ds-prose {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: var(--leading-normal);
 }
 .ds-form-grid {
   display: grid;
