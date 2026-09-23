@@ -1,20 +1,26 @@
 import { requireSuperAdmin } from "@/lib/auth";
-import { listBrandsWithCredentials } from "@/lib/brands";
+import { listBrandsWithCredentials, type Brand } from "@/lib/brands";
 import { listManagedUsers } from "@/lib/users";
 import { BrandFormFields } from "@/components/brand-form-fields";
 import { SyncNowButton } from "@/components/sync-now-button";
 import { Alert, Button, Field, Input, Page, PageHeader, Panel, Section, Select, Table, TextMuted } from "@/components/ui";
-import { createBrandAction, updateBrandAction, rotateWebLeadsWebhookAction } from "./brands/actions";
+import { CompanyPanel } from "./company-panel";
+import { createBrandAction } from "./brands/actions";
 import { addPersonAction, assignPersonAction } from "./people-actions";
+
+function companyOptionLabel(brand: Brand) {
+  return brand.is_active === false ? `${brand.name} (archived)` : brand.name;
+}
 
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ saved?: string; error?: string }>;
+  searchParams: Promise<{ saved?: string; error?: string; open?: string }>;
 }) {
   await requireSuperAdmin();
-  const { saved, error } = await searchParams;
+  const { saved, error, open } = await searchParams;
   const [brands, people] = await Promise.all([listBrandsWithCredentials(), listManagedUsers()]);
+  const activeBrands = brands.filter((brand) => brand.is_active !== false);
 
   return (
     <Page>
@@ -56,7 +62,7 @@ export default async function AdminPage({
                 <option value="">None (exec / super admin)</option>
                 {brands.map((brand) => (
                   <option key={brand.id} value={brand.id}>
-                    {brand.name}
+                    {companyOptionLabel(brand)}
                   </option>
                 ))}
               </Select>
@@ -85,7 +91,7 @@ export default async function AdminPage({
                     <option value="">None</option>
                     {brands.map((brand) => (
                       <option key={brand.id} value={brand.id}>
-                        {brand.name}
+                        {companyOptionLabel(brand)}
                       </option>
                     ))}
                   </Select>
@@ -99,10 +105,10 @@ export default async function AdminPage({
 
       <Section title="Companies & property IDs">
         <TextMuted>
-          Add a company or paste GA4 / GSC / Ads IDs. Sync now runs in the background so you can keep using the dashboard.
+          Open a company to edit it. Archive moves it to Archived Clients and stops its weekly sync. Delete asks you to confirm, then removes it completely.
         </TextMuted>
 
-        <div className="ds-panel-list">
+        <div className="ds-panel-list ds-company-list">
           <Panel>
             <h3 className="ds-heading-sm">Add a company</h3>
             <form action={createBrandAction} className="ds-stack">
@@ -113,43 +119,8 @@ export default async function AdminPage({
             </form>
           </Panel>
 
-          {brands.map((brand) => (
-            <Panel key={brand.id}>
-              <h3 className="ds-heading-sm">{brand.name}</h3>
-              <form action={updateBrandAction} className="ds-stack">
-                <input type="hidden" name="brand_id" value={brand.id} />
-                <BrandFormFields brand={brand} />
-                <div className="ds-company-actions">
-                  <Button>Save {brand.name}</Button>
-                  <SyncNowButton brandId={brand.id} label="Sync now" />
-                </div>
-              </form>
-              <div className="ds-stack ds-company-webhook">
-                <h3 className="ds-heading-sm">Web leads webhook</h3>
-                <TextMuted>
-                  Point the website form (or Zapier) here. POST JSON or form fields: first_name, last_name,
-                  email, date, attribution, count. Header <code>X-Webhook-Secret</code>.
-                </TextMuted>
-                <div className="ds-form-grid">
-                  <Field label="Webhook URL">
-                    <Input
-                      readOnly
-                      defaultValue={`${process.env.NEXT_PUBLIC_APP_URL ?? ""}/api/webhooks/web-leads/${brand.slug}`}
-                    />
-                  </Field>
-                  <Field label="Secret">
-                    <Input
-                      readOnly
-                      defaultValue={brand.web_leads_webhook_secret ?? "Save the company once to generate a secret"}
-                    />
-                  </Field>
-                </div>
-                <form action={rotateWebLeadsWebhookAction}>
-                  <input type="hidden" name="brand_id" value={brand.id} />
-                  <Button variant="secondary">Generate / rotate secret</Button>
-                </form>
-              </div>
-            </Panel>
+          {activeBrands.map((brand) => (
+            <CompanyPanel key={brand.id} brand={brand} returnTo="/admin" defaultOpen={open === brand.id} />
           ))}
         </div>
       </Section>

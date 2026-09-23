@@ -45,6 +45,20 @@ function IconAdmin() {
   );
 }
 
+function IconArchive() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path
+        d="M3.5 6.75h13v9a1.25 1.25 0 0 1-1.25 1.25h-10.5A1.25 1.25 0 0 1 3.5 15.75v-9Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path d="M2.75 3.75h14.5V6.5H2.75V3.75Z" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M8 10.5h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function AppNav({
   user,
   brands,
@@ -58,7 +72,8 @@ export function AppNav({
   const isLab = user.role === "lab_manager";
   const currentBrandSlug = pathname.startsWith("/brand/") ? pathname.split("/")[2] : undefined;
   const homeHref = isLab && labBrandSlug ? `/brand/${labBrandSlug}` : "/";
-  const onAdmin = pathname.startsWith("/admin");
+  const onArchived = pathname.startsWith("/admin/archived");
+  const onAdmin = pathname.startsWith("/admin") && !onArchived;
   const onRollup = pathname === "/";
 
   return (
@@ -97,6 +112,9 @@ export function AppNav({
         <NavSection label="Admin">
           <NavLink href="/admin" active={onAdmin} icon={<IconAdmin />}>
             Admin
+          </NavLink>
+          <NavLink href="/admin/archived" active={onArchived} icon={<IconArchive />}>
+            Archived Clients
           </NavLink>
         </NavSection>
       ) : null}

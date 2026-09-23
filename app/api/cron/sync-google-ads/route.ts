@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { listBrandsForSync } from "@/lib/brands";
 import { syncGoogleAdsForBrand } from "@/lib/integrations/google-ads";
 import { CRON_SYNC_DAYS, syncDateRange } from "@/lib/integrations/sync-window";
 
 export async function GET() {
-  const supabase = getSupabaseAdmin();
-  const { data: brands } = await supabase.from("brands").select("id");
+  const brands = await listBrandsForSync();
   const { startDate, endDate } = syncDateRange(CRON_SYNC_DAYS);
 
   const results = await Promise.allSettled(
-    (brands ?? []).map((brand) => syncGoogleAdsForBrand(brand.id as string, startDate, endDate)),
+    brands.map((brand) => syncGoogleAdsForBrand(brand.id, startDate, endDate)),
   );
 
   const failures = results.filter((result) => result.status === "rejected").length;

@@ -34,6 +34,12 @@
   --button-ghost-fg-hover: var(--color-text);
   --button-ghost-border: transparent;
 
+  --button-danger-bg: var(--color-danger);
+  --button-danger-bg-hover: color-mix(in srgb, var(--color-danger) 82%, var(--color-text));
+  --button-danger-fg: var(--color-on-accent);
+  --button-danger-fg-hover: var(--color-on-accent);
+  --button-danger-border: transparent;
+
   --input-bg: var(--color-surface);
   --input-border: var(--color-border-strong);
   --input-radius: var(--radius-md);

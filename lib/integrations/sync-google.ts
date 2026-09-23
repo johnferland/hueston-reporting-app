@@ -1,3 +1,4 @@
+import { listBrandsForSync } from "@/lib/brands";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { syncGa4ForBrand } from "@/lib/integrations/ga4";
 import { syncGscForBrand } from "@/lib/integrations/gsc";
@@ -120,13 +121,21 @@ export async function syncGoogleMetricsForBrand(brandId: string, days = DASHBOAR
   const { startDate, endDate } = syncDateRange(days);
   const supabase = getSupabaseAdmin();
 
-  const { data: brand, error } = await supabase
+  const withActive = await supabase
     .from("brands")
-    .select("id, slug, name")
+    .select("id, slug, name, is_active")
     .eq("id", brandId)
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  const brandResult =
+    withActive.error && /does not exist|schema cache/i.test(withActive.error.message)
+      ? await supabase.from("brands").select("id, slug, name").eq("id", brandId).maybeSingle()
+      : withActive;
+  if (brandResult.error) throw new Error(brandResult.error.message);
+  const brand = brandResult.data;
   if (!brand) throw new Error("Brand not found.");
+  if ("is_active" in brand && brand.is_active === false) {
+    throw new Error("This company is archived and is excluded from sync.");
+  }
 
   const { data: creds, error: credError } = await supabase
     .from("brand_credentials")
@@ -152,9 +161,7 @@ export async function syncGoogleMetrics(days = DASHBOARD_SYNC_DAYS): Promise<{
 }> {
   const { startDate, endDate } = syncDateRange(days);
   const supabase = getSupabaseAdmin();
-
-  const { data: brands, error } = await supabase.from("brands").select("id, slug, name").order("name");
-  if (error) throw new Error(error.message);
+  const brands = await listBrandsForSync();
 
   const { data: credentials, error: credError } = await supabase
     .from("brand_credentials")

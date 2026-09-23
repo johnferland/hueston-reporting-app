@@ -147,6 +147,29 @@ export async function listActiveBrands(): Promise<Brand[]> {
   return (await listBrandRows()).filter((brand) => brand.is_active !== false);
 }
 
+export async function listBrandsForSync(): Promise<Array<{ id: string; slug: string; name: string }>> {
+  const supabase = getSupabaseAdmin();
+  const withActive = await supabase.from("brands").select("id, slug, name, is_active").order("name");
+  if (!withActive.error) {
+    return (withActive.data ?? [])
+      .filter((row) => row.is_active !== false)
+      .map((row) => ({
+        id: String(row.id),
+        slug: String(row.slug),
+        name: String(row.name),
+      }));
+  }
+  if (!missingColumn(withActive.error.message)) throw new Error(withActive.error.message);
+
+  const basic = await supabase.from("brands").select("id, slug, name").order("name");
+  if (basic.error) throw new Error(basic.error.message);
+  return (basic.data ?? []).map((row) => ({
+    id: String(row.id),
+    slug: String(row.slug),
+    name: String(row.name),
+  }));
+}
+
 async function findBrand(filter: { id?: string; slug?: string }): Promise<Brand | null> {
   const supabase = getSupabaseAdmin();
   let lastError: string | undefined;
@@ -274,4 +297,54 @@ export async function updateBrand(brandId: string, input: BrandInput): Promise<B
   const data = await saveBrandRow("update", brandId, normalized);
   await upsertCredentials(brandId, normalized);
   return mapBrand(data as unknown as Record<string, unknown>);
+}
+
+export async function setBrandActive(brandId: string, isActive: boolean): Promise<Brand> {
+  const existing = await getBrandById(brandId);
+  if (!existing) throw new Error("Company not found.");
+
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from("brands").update({ is_active: isActive }).eq("id", brandId);
+  if (error) {
+    if (missingColumn(error.message)) {
+      throw new Error("Run supabase/add-is-active.sql in the Supabase SQL editor, then try again.");
+    }
+    throw new Error(error.message);
+  }
+
+  const updated = await getBrandById(brandId);
+  if (!updated) throw new Error("Company not found.");
+  return updated;
+}
+
+const BRAND_CHILD_TABLES = [
+  "brand_credentials",
+  "ga4_metrics",
+  "gsc_metrics",
+  "gsc_query_days",
+  "ads_metrics",
+  "manual_leads",
+  "web_leads",
+  "manual_deals",
+  "social_sqls",
+  "leaderboard_snapshots",
+  "sync_logs",
+];
+
+export async function deleteBrand(brandId: string): Promise<string> {
+  const existing = await getBrandById(brandId);
+  if (!existing) throw new Error("Company not found.");
+
+  const supabase = getSupabaseAdmin();
+  const { error: userError } = await supabase.from("users").update({ brand_id: null }).eq("brand_id", brandId);
+  if (userError) throw new Error(userError.message);
+
+  for (const table of BRAND_CHILD_TABLES) {
+    const { error } = await supabase.from(table).delete().eq("brand_id", brandId);
+    if (error && !missingColumn(error.message)) throw new Error(error.message);
+  }
+
+  const { error } = await supabase.from("brands").delete().eq("id", brandId);
+  if (error) throw new Error(error.message);
+  return existing.name;
 }

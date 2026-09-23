@@ -63,6 +63,9 @@
   display: grid;
   gap: var(--panel-list-gap);
 }
+.ds-company-list {
+  gap: var(--space-3);
+}
 
 .ds-row {
   display: flex;
@@ -240,6 +243,15 @@
   background: var(--button-ghost-bg-hover);
   color: var(--button-ghost-fg-hover);
 }
+.ds-button-danger {
+  background: var(--button-danger-bg);
+  color: var(--button-danger-fg);
+  border-color: var(--button-danger-border);
+}
+.ds-button-danger:hover {
+  background: var(--button-danger-bg-hover);
+  color: var(--button-danger-fg-hover);
+}
 
 .ds-field {
   display: grid;
@@ -324,6 +336,47 @@
 }
 .ds-company-webhook {
   margin-top: var(--space-6);
+}
+
+.ds-accordion.ds-panel {
+  padding: 0;
+}
+.ds-accordion-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--card-pad);
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--heading-weight);
+  letter-spacing: var(--heading-tracking);
+  color: var(--color-text);
+}
+.ds-accordion-summary::-webkit-details-marker,
+.ds-accordion-summary::marker {
+  display: none;
+}
+.ds-accordion-summary:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: calc(var(--space-1) * -1);
+}
+.ds-accordion-chevron {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+.ds-accordion[open] .ds-accordion-chevron {
+  transform: rotate(180deg);
+}
+.ds-accordion-body {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0 var(--card-pad) var(--card-pad);
 }
 
 .ds-shell {

@@ -2,12 +2,13 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 
 const variantClass: Record<ButtonVariant, string> = {
   primary: "ds-button",
   secondary: "ds-button ds-button-secondary",
   ghost: "ds-button ds-button-ghost",
+  danger: "ds-button ds-button-danger",
 };
 
 export function buttonClassName(variant: ButtonVariant = "primary", className?: string) {
