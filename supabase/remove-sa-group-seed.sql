@@ -1,6 +1,7 @@
 -- Run once in the Hueston Supabase SQL editor.
--- Removes the four Specialty / SA Group companies copied in from schema.sql.
--- Fails if any of those rows already have people, credentials, or metrics.
+-- Removes leftover SA Group seed companies. ida and edl are real Hueston clients
+-- in the marketing export, so they are not included.
+-- Fails if any of these rows already have people, credentials, or metrics.
 
 delete from brands
-where slug in ('sa-appliances', 'odl-ortho', 'ida', 'edl');
+where slug in ('sa-appliances', 'odl-ortho');
