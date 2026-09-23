@@ -3,7 +3,7 @@ import { canAccessBrand, requireAppUser } from "@/lib/auth";
 import { getBrandById } from "@/lib/brands";
 import { metricsForReportMonth, getMonthlyReportBySlug, reportPath } from "@/lib/monthly-reports";
 import { AI_REFERRAL_PATTERNS } from "@/lib/integrations/ga4";
-import { Button, MetricCard, Page, PageHeader, Panel, Section, TextMuted } from "@/components/ui";
+import { Button, MetricCard, Page, PageHeader, Panel, ReportMarkdown, Section, TextMuted } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +41,7 @@ export default async function MonthlyReportPage({
       {workPage ? (
         <Section title="Work done last month">
           <Panel>
-            <p className="ds-prose">{report.work_done}</p>
+            <ReportMarkdown source={report.work_done} />
           </Panel>
           <Button href={reportPath(report.slug)} variant="secondary">
             Back to results
@@ -51,7 +51,7 @@ export default async function MonthlyReportPage({
         <>
           <Section title="Win of the month">
             <Panel>
-              <p className="ds-prose">{report.win_of_month}</p>
+              <ReportMarkdown source={report.win_of_month} />
             </Panel>
           </Section>
 

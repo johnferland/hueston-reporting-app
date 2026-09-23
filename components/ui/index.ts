@@ -7,3 +7,4 @@ export { Logo } from "./logo";
 export { Nav, NavBrand, NavLink, NavMenu, NavMenuItem, NavRight, NavSection, Shell, ShellMain } from "./nav";
 export { SegmentedControl, SegmentedItem } from "./segmented-control";
 export { MetricCard, EmptyCard } from "./metric-card";
+export { ReportMarkdown } from "./markdown";

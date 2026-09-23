@@ -81,7 +81,7 @@ export function CompanyPanel({
         <div className="ds-stack ds-company-webhook">
           <h3 className="ds-heading-sm">Monthly report</h3>
           <TextMuted>
-            Write the win and the work from last month, then generate. The report uses this company&apos;s live sections and opens from their dashboard.
+            Write the win and the work from last month, then generate. Markdown is formatted on the report: ## headings, **bold**, and bullet lists.
           </TextMuted>
           <form action={generateMonthlyReportAction} className="ds-stack">
             <input type="hidden" name="brand_id" value={brand.id} />
@@ -93,7 +93,7 @@ export function CompanyPanel({
               <Textarea name="win_of_month" required placeholder="The result worth leading with." />
             </Field>
             <Field label="Work done last month">
-              <Textarea name="work_done" required className="ds-textarea-lg" placeholder="What the team did. This is page 2 of the report." />
+              <Textarea name="work_done" required className="ds-textarea-lg" placeholder={"What the team did. Markdown works, for example:\n## Summary\n- **Shipped:** the change and why it matters."} />
             </Field>
             <div className="ds-company-actions">
               <Button>Generate monthly report</Button>
