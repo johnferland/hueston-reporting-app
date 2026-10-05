@@ -350,6 +350,16 @@
   height: 1.05rem;
   accent-color: var(--color-accent);
 }
+.ds-company-pick {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+.ds-company-pick legend {
+  padding: 0;
+  margin-bottom: var(--space-1);
+}
 .ds-company-actions {
   display: flex;
   flex-wrap: wrap;

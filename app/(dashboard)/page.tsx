@@ -14,14 +14,16 @@ export default async function DashboardHome({
   const user = await requireAppUser();
 
   if (user.role === "lab_manager") {
-    if (!user.brand_id) {
+    if (!user.brand_ids.length) {
       return (
         <Page>
-          <PageHeader title="No company assigned" description="Ask a Super Admin to assign your email to a company." />
+          <PageHeader title="No company assigned" description="Ask a Super Admin to assign your email to one or more companies." />
         </Page>
       );
     }
-    const brand = await getBrandById(user.brand_id);
+    const homeId =
+      user.brand_id && user.brand_ids.includes(user.brand_id) ? user.brand_id : user.brand_ids[0];
+    const brand = await getBrandById(homeId);
     redirect(brand ? `/brand/${brand.slug}` : "/sign-in");
   }
 

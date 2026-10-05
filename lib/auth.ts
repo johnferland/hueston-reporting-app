@@ -10,7 +10,42 @@ export type AppUser = {
   email: string;
   role: Role;
   brand_id: string | null;
+  /** Assigned company ids for company managers. Empty for exec / super_admin. */
+  brand_ids: string[];
 };
+
+type UserRow = {
+  id: string;
+  clerk_user_id: string | null;
+  email: string;
+  role: Role;
+  brand_id: string | null;
+};
+
+function missingUserBrandsTable(message: string | undefined) {
+  return Boolean(
+    message && /could not find the table|relation ["']?(?:\w+\.)?user_brands["']? does not exist|schema cache/i.test(message),
+  );
+}
+
+async function brandIdsForUser(userId: string, fallback: string | null): Promise<string[]> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.from("user_brands").select("brand_id").eq("user_id", userId);
+  if (error) {
+    if (missingUserBrandsTable(error.message)) return fallback ? [fallback] : [];
+    throw new Error(error.message);
+  }
+  const ids = [...new Set((data ?? []).map((row) => String(row.brand_id)))];
+  if (ids.length) return ids;
+  return fallback ? [fallback] : [];
+}
+
+async function toAppUser(row: UserRow): Promise<AppUser> {
+  return {
+    ...row,
+    brand_ids: await brandIdsForUser(row.id, row.brand_id),
+  };
+}
 
 function emailsFromClerkUser(clerk: {
   primaryEmailAddress?: { emailAddress?: string | null } | null;
@@ -36,9 +71,9 @@ export async function getCurrentAppUser(): Promise<AppUser | null> {
     .from("users")
     .select("id, clerk_user_id, email, role, brand_id")
     .eq("clerk_user_id", userId)
-    .maybeSingle<AppUser>();
+    .maybeSingle<UserRow>();
 
-  if (byClerk.data) return byClerk.data;
+  if (byClerk.data) return toAppUser(byClerk.data);
 
   const emails = emailsFromClerkUser(await currentUser());
   for (const email of emails) {
@@ -46,14 +81,14 @@ export async function getCurrentAppUser(): Promise<AppUser | null> {
       .from("users")
       .select("id, clerk_user_id, email, role, brand_id")
       .ilike("email", email)
-      .maybeSingle<AppUser>();
+      .maybeSingle<UserRow>();
 
     if (!byEmail.data) continue;
 
     if (byEmail.data.clerk_user_id !== userId) {
       await supabase.from("users").update({ clerk_user_id: userId }).eq("id", byEmail.data.id);
     }
-    return { ...byEmail.data, clerk_user_id: userId };
+    return toAppUser({ ...byEmail.data, clerk_user_id: userId });
   }
 
   return null;
@@ -72,7 +107,7 @@ export function canOpenAdmin(user: AppUser): boolean {
 
 export function canAccessBrand(user: AppUser, brandId: string): boolean {
   if (user.role === "super_admin" || user.role === "exec") return true;
-  return user.brand_id === brandId;
+  return user.brand_ids.includes(brandId);
 }
 
 export function canWrite(user: AppUser): boolean {
@@ -81,7 +116,7 @@ export function canWrite(user: AppUser): boolean {
 
 export function canLogWeeklyLeads(user: AppUser, brandId: string): boolean {
   if (user.role === "super_admin") return true;
-  return user.role === "lab_manager" && user.brand_id === brandId;
+  return user.role === "lab_manager" && user.brand_ids.includes(brandId);
 }
 
 export async function requireSuperAdmin(): Promise<AppUser> {

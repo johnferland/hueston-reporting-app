@@ -9,6 +9,13 @@ function formValue(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "");
 }
 
+function formBrandIds(formData: FormData): string[] {
+  return formData
+    .getAll("brand_ids")
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+}
+
 function parseRole(value: string): Role {
   if (value === "super_admin" || value === "exec" || value === "lab_manager") return value;
   throw new Error("Invalid role.");
@@ -21,7 +28,7 @@ export async function addPersonAction(formData: FormData) {
     await addOrAssignUser({
       email: formValue(formData, "email"),
       role,
-      brandId: formValue(formData, "brand_id") || null,
+      brandIds: formBrandIds(formData),
     });
   } catch (error) {
     redirect(`/admin?error=${encodeURIComponent(error instanceof Error ? error.message : "Could not add person.")}`);
@@ -35,7 +42,7 @@ export async function assignPersonAction(formData: FormData) {
     await assignExistingUser({
       userId: formValue(formData, "user_id"),
       role: parseRole(formValue(formData, "role")),
-      brandId: formValue(formData, "brand_id") || null,
+      brandIds: formBrandIds(formData),
     });
   } catch (error) {
     redirect(`/admin?error=${encodeURIComponent(error instanceof Error ? error.message : "Could not assign person.")}`);

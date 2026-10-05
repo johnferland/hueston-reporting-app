@@ -29,9 +29,17 @@ create table users (
   clerk_user_id text unique,
   email text not null,
   role text not null check (role in ('super_admin', 'exec', 'lab_manager')),
-  brand_id uuid references brands(id), -- null for super_admin/exec
+  brand_id uuid references brands(id), -- primary/home company for lab_manager; null for super_admin/exec
   created_at timestamptz not null default now()
 );
+
+-- Many companies per company manager (and optional extras beyond users.brand_id).
+create table user_brands (
+  user_id uuid not null references users(id) on delete cascade,
+  brand_id uuid not null references brands(id) on delete cascade,
+  primary key (user_id, brand_id)
+);
+create index user_brands_brand_id_idx on user_brands (brand_id);
 
 -- Single shared credential set per provider (access@hueston.co consent covers all brands).
 create table shared_credentials (
@@ -193,7 +201,7 @@ declare
   t text;
 begin
   for t in select unnest(array[
-    'brands', 'users', 'shared_credentials', 'brand_credentials', 'ga4_metrics',
+    'brands', 'users', 'user_brands', 'shared_credentials', 'brand_credentials', 'ga4_metrics',
     'gsc_metrics', 'ads_metrics', 'manual_leads', 'web_leads', 'manual_deals', 'social_sqls',
     'leaderboard_snapshots', 'sync_logs', 'monthly_reports'
   ])

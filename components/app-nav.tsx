@@ -102,6 +102,19 @@ export function AppNav({
             </NavMenu>
           ) : null}
         </>
+      ) : brands.length ? (
+        <NavMenu label="Companies" icon={<IconLabs />} defaultOpen>
+          {brands.map((brand) => (
+            <NavMenuItem
+              key={brand.id}
+              href={`/brand/${brand.slug}`}
+              active={brand.slug === currentBrandSlug}
+              title={brand.name}
+            >
+              {brandNavLabel(brand)}
+            </NavMenuItem>
+          ))}
+        </NavMenu>
       ) : (
         <NavLink href={homeHref} active={pathname.startsWith("/brand/")} icon={<IconGrid />}>
           Dashboard

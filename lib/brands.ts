@@ -147,6 +147,12 @@ export async function listActiveBrands(): Promise<Brand[]> {
   return (await listBrandRows()).filter((brand) => brand.is_active !== false);
 }
 
+export async function listActiveBrandsByIds(brandIds: string[]): Promise<Brand[]> {
+  if (!brandIds.length) return [];
+  const allowed = new Set(brandIds);
+  return (await listActiveBrands()).filter((brand) => allowed.has(brand.id));
+}
+
 export async function listBrandsForSync(): Promise<Array<{ id: string; slug: string; name: string }>> {
   const supabase = getSupabaseAdmin();
   const withActive = await supabase.from("brands").select("id, slug, name, is_active").order("name");
@@ -339,6 +345,9 @@ export async function deleteBrand(brandId: string): Promise<string> {
   const supabase = getSupabaseAdmin();
   const { error: userError } = await supabase.from("users").update({ brand_id: null }).eq("brand_id", brandId);
   if (userError) throw new Error(userError.message);
+
+  const { error: membershipError } = await supabase.from("user_brands").delete().eq("brand_id", brandId);
+  if (membershipError && !missingColumn(membershipError.message)) throw new Error(membershipError.message);
 
   for (const table of BRAND_CHILD_TABLES) {
     const { error } = await supabase.from(table).delete().eq("brand_id", brandId);
