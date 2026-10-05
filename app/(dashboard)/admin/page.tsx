@@ -5,7 +5,7 @@ import { listManagedUsers } from "@/lib/users";
 import { BrandFormFields } from "@/components/brand-form-fields";
 import { SyncNowButton } from "@/components/sync-now-button";
 import { Alert, Button, Field, Input, Page, PageHeader, Panel, Section, Select, Table, TextMuted } from "@/components/ui";
-import { CompanyCheckboxes } from "./company-checkboxes";
+import { CompanyMultiSelect } from "./company-multi-select";
 import { CompanyPanel } from "./company-panel";
 import { createBrandAction } from "./brands/actions";
 import { addPersonAction, assignPersonAction } from "./people-actions";
@@ -61,9 +61,9 @@ export default async function AdminPage({
                 </Select>
               </Field>
             </div>
-            <CompanyCheckboxes brands={brands} />
+            <CompanyMultiSelect brands={brands} />
             <TextMuted>
-              For company managers, check every website they should see. Leave unchecked for exec or super admin.
+              For company managers, choose every website they should see. Leave empty for exec or super admin.
             </TextMuted>
             <Button>Add / update by email</Button>
           </form>
@@ -85,7 +85,7 @@ export default async function AdminPage({
                     <option value="exec">Exec</option>
                     <option value="super_admin">Super admin</option>
                   </Select>
-                  <CompanyCheckboxes brands={brands} selectedIds={person.brand_ids} />
+                  <CompanyMultiSelect brands={brands} selectedIds={person.brand_ids} />
                   <Button>Save</Button>
                 </form>
               </td>
