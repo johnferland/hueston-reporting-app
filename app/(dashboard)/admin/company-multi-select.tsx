@@ -1,51 +1,62 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
-import type { Brand } from "@/lib/brands";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
-function companyOptionLabel(brand: Brand) {
-  return brand.is_active === false ? `${brand.name} (archived)` : brand.name;
+export type CompanyOption = {
+  id: string;
+  name: string;
+  archived?: boolean;
+};
+
+function optionLabel(option: CompanyOption) {
+  return option.archived ? `${option.name} (archived)` : option.name;
 }
 
-function summaryLabel(brands: Brand[], selectedIds: string[]) {
+function summaryLabel(options: CompanyOption[], selectedIds: string[]) {
   if (!selectedIds.length) return "Select companies";
   if (selectedIds.length === 1) {
-    const brand = brands.find((item) => item.id === selectedIds[0]);
-    return brand ? companyOptionLabel(brand) : "1 company";
+    const match = options.find((option) => option.id === selectedIds[0]);
+    return match ? optionLabel(match) : "1 company";
   }
   return `${selectedIds.length} companies selected`;
 }
 
 export function CompanyMultiSelect({
-  brands,
+  options,
   selectedIds = [],
   name = "brand_ids",
 }: {
-  brands: Brand[];
+  options: CompanyOption[];
   selectedIds?: string[];
   name?: string;
 }) {
   const listId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(() => [...selectedIds]);
+  const selectedKey = selectedIds.join(",");
+  const initialSelected = useMemo(
+    () => (selectedKey ? selectedKey.split(",") : []),
+    [selectedKey],
+  );
+  const [selected, setSelected] = useState(initialSelected);
 
   useEffect(() => {
-    setSelected([...selectedIds]);
-  }, [selectedIds]);
+    setSelected(initialSelected);
+  }, [initialSelected]);
 
   useEffect(() => {
     if (!open) return;
-    const onPointerDown = (event: MouseEvent) => {
+    const onPointerDown = (event: PointerEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
-    document.addEventListener("mousedown", onPointerDown);
+    // Bubble phase so nav links still receive the activating click.
+    document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
@@ -70,16 +81,21 @@ export function CompanyMultiSelect({
         aria-labelledby={`${listId}-label`}
         onClick={() => setOpen((value) => !value)}
       >
-        <span>{summaryLabel(brands, selected)}</span>
+        <span>{summaryLabel(options, selected)}</span>
       </button>
       {open ? (
-        <div className="ds-multi-select-menu" role="listbox" aria-multiselectable="true" aria-labelledby={`${listId}-label`}>
-          {brands.map((brand) => {
-            const checked = selected.includes(brand.id);
+        <div
+          className="ds-multi-select-menu"
+          role="listbox"
+          aria-multiselectable="true"
+          aria-labelledby={`${listId}-label`}
+        >
+          {options.map((option) => {
+            const checked = selected.includes(option.id);
             return (
-              <label key={brand.id} className="ds-multi-select-option">
-                <input type="checkbox" checked={checked} onChange={() => toggle(brand.id)} />
-                <span>{companyOptionLabel(brand)}</span>
+              <label key={option.id} className="ds-multi-select-option">
+                <input type="checkbox" checked={checked} onChange={() => toggle(option.id)} />
+                <span>{optionLabel(option)}</span>
               </label>
             );
           })}

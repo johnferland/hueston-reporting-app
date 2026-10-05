@@ -23,6 +23,11 @@ export default async function AdminPage({
     listMonthlyReports(),
   ]);
   const activeBrands = brands.filter((brand) => brand.is_active !== false);
+  const companyOptions = brands.map((brand) => ({
+    id: brand.id,
+    name: brand.name,
+    archived: brand.is_active === false,
+  }));
 
   return (
     <Page>
@@ -61,7 +66,7 @@ export default async function AdminPage({
                 </Select>
               </Field>
             </div>
-            <CompanyMultiSelect brands={brands} />
+            <CompanyMultiSelect options={companyOptions} />
             <TextMuted>
               For company managers, choose every website they should see. Leave empty for exec or super admin.
             </TextMuted>
@@ -85,7 +90,7 @@ export default async function AdminPage({
                     <option value="exec">Exec</option>
                     <option value="super_admin">Super admin</option>
                   </Select>
-                  <CompanyMultiSelect brands={brands} selectedIds={person.brand_ids} />
+                  <CompanyMultiSelect options={companyOptions} selectedIds={person.brand_ids} />
                   <Button>Save</Button>
                 </form>
               </td>
