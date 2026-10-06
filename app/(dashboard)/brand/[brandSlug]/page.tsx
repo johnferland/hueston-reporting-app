@@ -65,7 +65,7 @@ export default async function BrandDashboard({
     leads_page: leadsPageParam,
     leads_per: leadsPerParam,
   } = await searchParams;
-  const period: PeriodKey = isPeriodKey(periodParam) ? periodParam : "week";
+  const period: PeriodKey = isPeriodKey(periodParam) ? periodParam : "month";
   const range = getPeriodRange(period);
   const periodLabel = formatPeriodCaption(period, range);
   const leadsPer = parseWebLeadPageSize(leadsPerParam);

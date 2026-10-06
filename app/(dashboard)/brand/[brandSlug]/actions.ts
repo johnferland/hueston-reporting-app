@@ -19,7 +19,7 @@ export async function saveWeeklyLeadsAction(formData: FormData) {
   const referralLeads = formNumber(formData, "referral_leads");
   const tradeShowLeads = formNumber(formData, "trade_show_leads");
   const socialMediaLeads = formNumber(formData, "social_media_leads");
-  const period = String(formData.get("period") ?? "week");
+  const period = String(formData.get("period") ?? "month");
   const back = `/brand/${brandSlug}?period=${encodeURIComponent(period)}`;
 
   if (!brandId || !weekStartDate) {

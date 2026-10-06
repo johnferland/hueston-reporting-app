@@ -28,7 +28,7 @@ export default async function DashboardHome({
   }
 
   const { period: periodParam } = await searchParams;
-  const period: PeriodKey = isPeriodKey(periodParam) ? periodParam : "week";
+  const period: PeriodKey = isPeriodKey(periodParam) ? periodParam : "month";
   const range = getPeriodRange(period);
   const brands = await listActiveBrands();
   const cards = await Promise.all(
