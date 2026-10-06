@@ -4,7 +4,8 @@ import { getBrandById, listActiveBrands } from "@/lib/brands";
 import { getBrandPeriodMetrics } from "@/lib/metrics";
 import { formatPeriodCaption, getPeriodRange, isPeriodKey, type PeriodKey } from "@/lib/period";
 import { PeriodToggle } from "@/components/period-toggle";
-import { Card, MetricCard, Page, PageHeader, TextMuted } from "@/components/ui";
+import { RollupList } from "@/components/rollup-list";
+import { Page, PageHeader } from "@/components/ui";
 
 export default async function DashboardHome({
   searchParams,
@@ -31,7 +32,7 @@ export default async function DashboardHome({
   const period: PeriodKey = isPeriodKey(periodParam) ? periodParam : "month";
   const range = getPeriodRange(period);
   const brands = await listActiveBrands();
-  const cards = await Promise.all(
+  const rows = await Promise.all(
     brands.map(async (brand) => ({
       brand,
       metrics: await getBrandPeriodMetrics(brand.id, range, period),
@@ -45,31 +46,7 @@ export default async function DashboardHome({
         description={`${formatPeriodCaption(period, range)}. Open a brand for the full dashboard.`}
         actions={<PeriodToggle current={period} basePath="/" />}
       />
-
-      <div className="ds-grid-brands">
-        {cards.map(({ brand, metrics }) => (
-          <Card key={brand.id} href={`/brand/${brand.slug}?period=${period}`} className="ds-card-frame">
-            <div className="ds-stack">
-              <div>
-                <h2 className="ds-heading-sm">{brand.name}</h2>
-                <TextMuted>{brand.domain}</TextMuted>
-              </div>
-              {brand.visible_sections.leads ? (
-                <MetricCard label="Total leads" hint="totalLeads" metric={metrics.totalLeads} />
-              ) : null}
-              {brand.visible_sections.search ? (
-                <>
-                  <MetricCard label="Organic traffic" hint="organicTraffic" metric={metrics.organicTraffic} />
-                  <MetricCard label="Top 3 keywords" hint="keywordsTop3" metric={metrics.keywordsTop3} />
-                </>
-              ) : null}
-              {brand.visible_sections.google_ads || brand.visible_sections.meta_ads ? (
-                <MetricCard label="Cost per conversion" hint="adsCostPerConversion" metric={metrics.adsCostPerConversion} digits={2} prefix="$" lowerIsBetter />
-              ) : null}
-            </div>
-          </Card>
-        ))}
-      </div>
+      <RollupList period={period} rows={rows} />
     </Page>
   );
 }
