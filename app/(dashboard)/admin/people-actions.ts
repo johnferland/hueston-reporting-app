@@ -38,14 +38,19 @@ export async function addPersonAction(formData: FormData) {
 
 export async function assignPersonAction(formData: FormData) {
   await requireSuperAdmin();
+  const userId = formValue(formData, "user_id");
   try {
     await assignExistingUser({
-      userId: formValue(formData, "user_id"),
+      userId,
       role: parseRole(formValue(formData, "role")),
       brandIds: formBrandIds(formData),
     });
   } catch (error) {
-    redirect(`/admin?error=${encodeURIComponent(error instanceof Error ? error.message : "Could not assign person.")}`);
+    redirect(
+      `/admin?error=${encodeURIComponent(error instanceof Error ? error.message : "Could not assign person.")}&open=${encodeURIComponent(userId)}`,
+    );
   }
-  redirect(`/admin?saved=${encodeURIComponent("Assignment updated.")}`);
+  redirect(
+    `/admin?saved=${encodeURIComponent("Assignment updated.")}&open=${encodeURIComponent(userId)}`,
+  );
 }

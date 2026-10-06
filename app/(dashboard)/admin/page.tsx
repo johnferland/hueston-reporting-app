@@ -4,11 +4,12 @@ import { listMonthlyReports } from "@/lib/monthly-reports";
 import { listManagedUsers } from "@/lib/users";
 import { BrandFormFields } from "@/components/brand-form-fields";
 import { SyncNowButton } from "@/components/sync-now-button";
-import { Alert, Button, Field, Input, Page, PageHeader, Panel, Section, Select, Table, TextMuted } from "@/components/ui";
+import { Alert, Button, Field, Input, Page, PageHeader, Panel, Section, Select, TextMuted } from "@/components/ui";
 import { CompanyMultiSelect } from "./company-multi-select";
 import { CompanyPanel } from "./company-panel";
+import { PeopleList } from "./people-list";
 import { createBrandAction } from "./brands/actions";
-import { addPersonAction, assignPersonAction } from "./people-actions";
+import { addPersonAction } from "./people-actions";
 
 export default async function AdminPage({
   searchParams,
@@ -47,8 +48,8 @@ export default async function AdminPage({
 
       <Section title="People">
         <TextMuted>
-          Add an email, then assign it to Exec (all brands, read-only) or Company Manager (one or more companies).
-          They sign in with Clerk using that email; until then the row stays unlinked.
+          Add an email, then assign it to Exec (all brands, read-only) or Company Manager (one or more companies). Open a
+          person to edit their access. Use the filter when the list gets long.
         </TextMuted>
 
         <Panel>
@@ -74,29 +75,7 @@ export default async function AdminPage({
           </form>
         </Panel>
 
-        <Table headers={["Email", "Signed in", "Assign"]}>
-          {people.map((person) => (
-            <tr key={person.id}>
-              <td>
-                {person.email}
-                <div className="ds-muted">{person.brand_name ?? "All brands"}</div>
-              </td>
-              <td>{person.clerk_user_id && !person.clerk_user_id.startsWith("pending:") ? "Yes" : "Invited"}</td>
-              <td>
-                <form action={assignPersonAction} className="ds-stack">
-                  <input type="hidden" name="user_id" value={person.id} />
-                  <Select name="role" defaultValue={person.role}>
-                    <option value="lab_manager">Company manager</option>
-                    <option value="exec">Exec</option>
-                    <option value="super_admin">Super admin</option>
-                  </Select>
-                  <CompanyMultiSelect options={companyOptions} selectedIds={person.brand_ids} />
-                  <Button>Save</Button>
-                </form>
-              </td>
-            </tr>
-          ))}
-        </Table>
+        <PeopleList people={people} companyOptions={companyOptions} openId={open} />
       </Section>
 
       <Section title="Companies & property IDs">

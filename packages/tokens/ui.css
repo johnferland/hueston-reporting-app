@@ -66,6 +66,25 @@
 .ds-company-list {
   gap: var(--space-3);
 }
+.ds-people-list {
+  gap: var(--space-2);
+}
+.ds-person-summary {
+  align-items: flex-start;
+}
+.ds-person-summary-text {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.ds-person-email {
+  font-size: var(--text-md);
+  font-weight: var(--heading-weight);
+  overflow-wrap: anywhere;
+}
+.ds-person-panel .ds-accordion-summary {
+  font-size: var(--text-md);
+}
 
 .ds-row {
   display: flex;
