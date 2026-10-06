@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { Brand } from "@/lib/brands";
 import type { BrandPeriodMetrics, MetricValue } from "@/lib/metrics";
 import { formatDelta, formatNumber, PERIOD_LABELS, type PeriodKey } from "@/lib/period";
@@ -77,26 +78,31 @@ function overallStatus(tones: Tone[]) {
 export function RollupList({
   period,
   rows,
+  header,
 }: {
   period: PeriodKey;
   rows: Array<{ brand: Brand; metrics: BrandPeriodMetrics }>;
+  header?: ReactNode;
 }) {
   const periodWord = PERIOD_LABELS[period].toLowerCase();
 
   return (
     <div className="ds-rollup">
-      <div className="ds-rollup-toolbar">
-        <h2 className="ds-heading-sm">Client performance</h2>
-        <p className="ds-muted">This {periodWord} vs prior {periodWord}</p>
-      </div>
+      <div className="ds-rollup-sticky">
+        {header}
+        <div className="ds-rollup-toolbar">
+          <h2 className="ds-heading-sm">Client performance</h2>
+          <p className="ds-muted">This {periodWord} vs prior {periodWord}</p>
+        </div>
 
-      <div className="ds-rollup-head" aria-hidden="true">
-        <span>Client</span>
-        <span>Total leads</span>
-        <span>Organic traffic</span>
-        <span>Top 3 keywords</span>
-        <span>Cost / conversion</span>
-        <span>Overall</span>
+        <div className="ds-rollup-head" aria-hidden="true">
+          <span>Client</span>
+          <span>Total leads</span>
+          <span>Organic traffic</span>
+          <span>Top 3 keywords</span>
+          <span>Cost / conversion</span>
+          <span>Overall</span>
+        </div>
       </div>
 
       <div className="ds-rollup-rows">

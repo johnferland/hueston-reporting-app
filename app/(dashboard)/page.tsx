@@ -40,13 +40,18 @@ export default async function DashboardHome({
   );
 
   return (
-    <Page>
-      <PageHeader
-        title="Executive rollup"
-        description={`${formatPeriodCaption(period, range)}. Open a brand for the full dashboard.`}
-        actions={<PeriodToggle current={period} basePath="/" />}
+    <Page className="ds-page-rollup">
+      <RollupList
+        period={period}
+        rows={rows}
+        header={
+          <PageHeader
+            title="Executive rollup"
+            description={`${formatPeriodCaption(period, range)}. Open a brand for the full dashboard.`}
+            actions={<PeriodToggle current={period} basePath="/" />}
+          />
+        }
       />
-      <RollupList period={period} rows={rows} />
     </Page>
   );
 }
